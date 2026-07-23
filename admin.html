@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin | Excel Booking Center</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="stylesheet" href="css/style.css" />
+  <script defer src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo" aria-label="Excel Booking Center home">
+        <span class="logo-mark" aria-hidden="true">EBC</span>
+        <span class="logo-text">Excel Booking Center &mdash; Admin</span>
+      </a>
+      <div id="authArea"></div>
+    </div>
+  </header>
+
+  <main>
+    <section class="admin-section">
+      <div class="container">
+
+        <div id="loggedOutView">
+          <h1 class="section-title">Admin Access</h1>
+          <p class="section-subtitle">Log in with your Netlify Identity account to view customer bookings.</p>
+          <div style="text-align:center;">
+            <button class="btn btn-primary btn-lg" id="loginBtn">Log In</button>
+          </div>
+        </div>
+
+        <div id="loggedInView" class="hidden">
+          <div class="admin-toolbar">
+            <h1 class="section-title" style="margin:0;">Bookings</h1>
+            <div class="admin-toolbar-actions">
+              <button class="btn btn-secondary" id="refreshBtn">Refresh</button>
+              <button class="btn btn-secondary" id="logoutBtn">Log Out</button>
+            </div>
+          </div>
+
+          <p id="adminStatus" class="admin-status"></p>
+
+          <div class="admin-table-wrap">
+            <table class="admin-table" id="bookingsTable">
+              <thead>
+                <tr>
+                  <th>Reference</th>
+                  <th>Name</th>
+                  <th>Phone</th>
+                  <th>Email</th>
+                  <th>Date</th>
+                  <th>Service(s) &amp; Times</th>
+                  <th>Notes</th>
+                  <th>Submitted</th>
+                </tr>
+              </thead>
+              <tbody id="bookingsTableBody"></tbody>
+            </table>
+          </div>
+
+          <p class="empty-state hidden" id="bookingsAdminEmpty">No bookings have been submitted yet.</p>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <script>
+    'use strict';
+
+    // Formats an ISO timestamp as a short readable date/time for the admin table.
+    function formatSubmittedAt(iso) {
+      if (!iso) return '—';
+      return new Date(iso).toLocaleString('en-US', {
+        year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit',
+      });
+    }
+
+    // Renders the bookings array into the admin table, or shows the empty state.
+    function renderBookingsTable(bookings) {
+      const tbody = document.getElementById('bookingsTableBody');
+      const emptyState = document.getElementById('bookingsAdminEmpty');
+      const table = document.getElementById('bookingsTable');
+      tbody.innerHTML = '';
+
+      if (!bookings.length) {
+        table.classList.add('hidden');
+        emptyState.classList.remove('hidden');
+        return;
+      }
+
+      table.classList.remove('hidden');
+      emptyState.classList.add('hidden');
+
+      bookings
+        .slice()
+        .sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt))
+        .forEach((b) => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${b.reference || '—'}</td>
+            <td>${b.fullName || '—'}</td>
+            <td>${b.phone || '—'}</td>
+            <td>${b.email || '—'}</td>
+            <td>${b.date || '—'}</td>
+            <td>${(b.services || '—').split(';').join('<br />')}</td>
+            <td>${b.notes || '—'}</td>
+            <td>${formatSubmittedAt(b.submittedAt)}</td>
+          `;
+          tbody.appendChild(row);
+        });
+    }
+
+    // Fetches bookings from the serverless function using the current Identity session token.
+    async function loadBookings() {
+      const status = document.getElementById('adminStatus');
+      const user = window.netlifyIdentity.currentUser();
+      if (!user) return;
+
+      status.textContent = 'Loading bookings…';
+      try {
+        const token = await user.jwt();
+        const res = await fetch('/.netlify/functions/get-bookings', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to load bookings.');
+        renderBookingsTable(data.bookings || []);
+        status.textContent = `${data.bookings.length} booking(s) loaded.`;
+      } catch (err) {
+        status.textContent = `Error: ${err.message}`;
+      }
+    }
+
+    // Switches the visible view based on whether an admin is currently logged in.
+    function showLoggedIn(isLoggedIn) {
+      document.getElementById('loggedOutView').classList.toggle('hidden', isLoggedIn);
+      document.getElementById('loggedInView').classList.toggle('hidden', !isLoggedIn);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const identity = window.netlifyIdentity;
+      if (!identity) {
+        document.getElementById('adminStatus').textContent =
+          'Netlify Identity script failed to load. This page only works when deployed on Netlify with Identity enabled.';
+        return;
+      }
+
+      identity.init();
+
+      document.getElementById('loginBtn').addEventListener('click', () => identity.open('login'));
+      document.getElementById('logoutBtn').addEventListener('click', () => identity.logout());
+      document.getElementById('refreshBtn').addEventListener('click', loadBookings);
+
+      identity.on('login', () => {
+        showLoggedIn(true);
+        loadBookings();
+      });
+      identity.on('logout', () => showLoggedIn(false));
+
+      showLoggedIn(!!identity.currentUser());
+      if (identity.currentUser()) loadBookings();
+    });
+  </script>
+</body>
+</html>
