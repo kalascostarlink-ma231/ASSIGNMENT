@@ -4,7 +4,7 @@ A fully responsive, interactive service booking website for **Excel Booking Cent
 
 ## Live Site
 
-> Update this once deployed on Vercel, e.g. `https://assignment-xyz.vercel.app`
+[https://excelspa.vercel.app](https://excelspa.vercel.app)
 
 ## Features
 
