@@ -4,7 +4,7 @@ A fully responsive, interactive service booking website for **Excel Booking Cent
 
 ## Live Site
 
-[https://excelbooking.netlify.app](https://excelbooking.netlify.app)
+> Update this once deployed on Vercel, e.g. `https://assignment-xyz.vercel.app`
 
 ## Features
 
@@ -39,10 +39,6 @@ EXCEL BOOKING PLATFORM/
 │   └── style.css                    # All styling, custom properties, responsive rules
 ├── js/
 │   └── script.js                    # Services data, rendering, validation, booking logic
-├── netlify/
-│   └── functions/
-│       └── get-bookings.js          # Serverless function: returns bookings to logged-in admins only
-├── netlify.toml                     # Tells Netlify where the functions folder is
 └── README.md
 ```
 
@@ -52,7 +48,7 @@ EXCEL BOOKING PLATFORM/
 - CSS3 (custom properties/theming, Flexbox, Grid, media queries)
 - Vanilla JavaScript (ES6+: `const`/`let`, arrow functions, template literals, Intersection Observer)
 
-The customer-facing site (`index.html`) has no external dependencies and needs no package manager or build step. `admin.html` is the one exception: it loads the Netlify Identity widget script and calls a Netlify serverless function, so it only works once deployed on Netlify (see **Admin: Viewing Bookings** below).
+No package manager, build step, or JS libraries anywhere in this project — including `admin.html`, which talks to Supabase using plain `fetch()` calls rather than an SDK. The one thing that needs actual deployment (not `file://`) to work is saving/reading bookings from Supabase (see **Admin: Viewing Bookings** below); everything else runs identically locally and deployed.
 
 ## Running Locally
 
@@ -63,52 +59,64 @@ That's it — there is no server or install step required.
 
 ## Deployment
 
-Any static host works since this is plain HTML/CSS/JS:
+**Vercel (this project's host)**
+1. Go to [vercel.com/new](https://vercel.com/new) → **Import Git Repository** → pick this repo.
+2. Leave build settings empty (static site, no framework) and deploy.
+3. Vercel redeploys automatically on every push to `main`.
 
-**GitHub Pages**
-1. Push this folder to a GitHub repository.
-2. Repository Settings → Pages → set source to the `main` branch (root).
-3. Your site will be published at `https://<username>.github.io/<repo-name>/`.
-
-**Netlify**
-1. Drag and drop the project folder onto [app.netlify.com/drop](https://app.netlify.com/drop), or connect the GitHub repo.
-2. Netlify deploys automatically and gives you a live URL.
-
-**Vercel**
-1. Import the GitHub repo at [vercel.com/new](https://vercel.com/new).
-2. Leave build settings empty (static site) and deploy.
+Any other static host works too (GitHub Pages, Netlify, etc.) since this is plain HTML/CSS/JS — just point it at the repo root.
 
 After deploying, verify the site on a real mobile device and update the **Live Site** link above.
 
 ## Admin: Viewing Bookings
 
-Bookings can be viewed two ways:
+Bookings are saved to a **Supabase** project (a free hosted Postgres database with built-in authentication) and viewed on `/admin.html`, linked from the site footer. It's safe to leave that link public — the page is useless without a real Supabase admin login, and the database itself rejects unauthenticated reads (see Row Level Security below), not just the page's JavaScript.
 
-### 1. Netlify's own dashboard (already working, no setup)
-Every confirmed booking is submitted to **Netlify Forms** in the background:
-1. Log in to [app.netlify.com](https://app.netlify.com) and open the `excelbooking` site.
-2. Go to **Forms** in the sidebar → click the **booking** form to see every submission, newest first.
-3. **Forms → Form notifications → Add notification → Email notification** to get emailed the moment someone books.
-4. Submissions can be exported to CSV from the same page.
+### One-time Supabase setup (I can't do this part for you — it's tied to your account)
 
-This only works on the deployed Netlify site — there's no submission endpoint when opening `index.html` directly, so the site quietly skips that step during local testing (customers still get the on-page confirmation either way). Free accounts include 100 submissions/month.
+1. **Create a project** at [supabase.com](https://supabase.com) (free tier).
+2. **Create the `bookings` table** — open the SQL Editor and run:
+   ```sql
+   create table bookings (
+     id bigint generated always as identity primary key,
+     reference text not null,
+     full_name text not null,
+     phone text not null,
+     email text not null,
+     booking_date date not null,
+     start_time text not null,
+     services text not null,
+     total_price numeric not null,
+     notes text,
+     created_at timestamptz not null default now()
+   );
 
-### 2. A dedicated admin page on your own site (`/admin.html`)
-An "Admin Login" link in the site footer takes anyone straight to this page — it's safe to leave public since it's useless without a Netlify Identity account you've invited (see step 2 below). For staff who shouldn't need a full Netlify account, `admin.html` is a password-protected page (via **Netlify Identity**) that lists bookings in a simple table. It calls a small serverless function (`netlify/functions/get-bookings.js`) that only returns data to a verified, logged-in user — the check happens on Netlify's servers, not in the page's JavaScript, so it's real authentication rather than a client-side password.
+   alter table bookings enable row level security;
 
-**One-time setup required in the Netlify dashboard (I can't do this part for you — it's tied to your account):**
-1. **Site settings → Identity → Enable Identity.**
-2. **Identity → Invite users** and invite yourself (and any staff) by email — registration is invite-only by default, which is what you want.
-3. **User settings (top-right avatar) → Applications → Personal access tokens → New access token.** Copy the generated token.
-4. **Site settings → Environment variables → Add a variable:**
-   - `NETLIFY_API_TOKEN` = the token from step 3
-   - `NETLIFY_SITE_ID` = this site's Site ID, found on **Site settings → General → Site details**
-5. Redeploy the site once those variables are saved (Netlify only picks up new env vars on a fresh deploy).
-6. Visit `https://excelbooking.netlify.app/admin.html`, click **Log In**, and sign in with the email you invited in step 2.
+   -- Anyone (including customers who aren't logged in) can submit a booking...
+   create policy "Anyone can insert bookings"
+     on bookings for insert
+     to anon
+     with check (true);
 
-Without steps 1–5 done, `admin.html` will load but show a login/loading error — that's expected until the account owner completes the one-time Netlify configuration above.
+   -- ...but only a logged-in admin can read the list back.
+   create policy "Authenticated users can view bookings"
+     on bookings for select
+     to authenticated
+     using (true);
+   ```
+3. **Create your admin login**: Authentication → Users → **Add user** → enter your email + a password (do this instead of letting people self-register, so only people you add can log in).
+4. **Get your API keys**: Project Settings → API → copy the **Project URL** and the **anon public** key.
+5. **Paste both values into this project** in two places — they must match exactly:
+   - `js/script.js`, near the top: `SUPABASE_URL` and `SUPABASE_ANON_KEY`
+   - `admin.html`, inside the `<script>` block: the same two constants
+6. Commit and push (or redeploy) so the live site picks up the values.
+7. Visit `/admin.html`, log in with the email/password from step 3.
+
+The anon key is meant to be public — it's not a secret, since Supabase enforces who can read/write via the Row Level Security policies from step 2, not by hiding the key. Until steps 1–6 are done, the site still works end-to-end for customers (bookings just aren't saved anywhere beyond that browser's own session), and `admin.html` will show a "Supabase is not configured yet" message instead of a login error.
 
 ## Notes
 
-- Each customer's own "My Bookings" list is stored in that browser's memory only and resets on reload — it is a personal session view, not the admin list. The admin list of record is Netlify Forms, described above.
+- Each customer's own "My Bookings" list is stored in that browser's memory only and resets on reload — it's a personal session view. The admin list of record is the Supabase `bookings` table, described above.
+- The double-booking check only looks at bookings made in the *same browser session* for live UI feedback (disabling taken time slots as you type) — it doesn't yet check Supabase for conflicts from other customers' devices. If double-bookings across devices become a real problem, the fix is to query Supabase for that date's existing bookings before rendering time slots.
 - Colors, spacing and fonts are defined as CSS custom properties in `:root` in `css/style.css`, so the entire theme can be re-skinned from one place.

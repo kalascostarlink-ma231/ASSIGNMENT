@@ -7,6 +7,13 @@
    Navigation, Animations, Init
    ========================================================= */
 
+/* ---------- Backend config (Supabase) ---------- */
+// The anon key is meant to be public — Supabase enforces access with Row Level Security
+// policies on the `bookings` table (see README), not by keeping this key secret.
+// Replace both placeholders with your project's values from Supabase Settings -> API.
+const SUPABASE_URL = 'YOUR_SUPABASE_PROJECT_URL';
+const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+
 /* ---------- Data ---------- */
 // Master list of services offered. Rendered dynamically — never hard-coded in HTML.
 const services = [
@@ -228,7 +235,6 @@ function renderServiceCheckboxList() {
       const totalDuration = selectedServiceIds.reduce((sum, sid) => sum + services.find((s) => s.id === sid).duration, 0);
       if (selectedStartMinutes !== null && isSlotUnavailable(selectedStartMinutes, totalDuration, dateValue)) {
         selectedStartMinutes = null;
-        document.getElementById('timeSlotInput').value = '';
       }
 
       validateField('services');
@@ -297,7 +303,6 @@ function renderTimeSlots() {
 
     button.addEventListener('click', () => {
       selectedStartMinutes = slot.minutes;
-      document.getElementById('timeSlotInput').value = slot.label;
       renderTimeSlots();
       validateField('timeSlot');
       updateSummary();
@@ -399,7 +404,6 @@ function initBookingValidation() {
     el.addEventListener('change', () => {
       if (id === 'bookingDate') {
         selectedStartMinutes = null;
-        document.getElementById('timeSlotInput').value = '';
         renderTimeSlots();
       }
       updateSummary();
@@ -480,46 +484,48 @@ function handleBookingSubmit(event) {
     notes: document.getElementById('notes').value.trim(),
   };
 
-  document.getElementById('servicesSummaryInput').value = buildScheduleSummaryText(booking);
-
   bookings.push(booking);
-  submitBookingToNetlify(booking);
+  submitBookingToSupabase(booking);
   showConfirmation(booking);
   renderBookingsList();
   showToast(`Booking confirmed! Reference ${booking.reference}`);
 }
 
-// Builds a short human-readable line per service for Netlify Forms / the admin dashboard.
+// Builds a short human-readable line per service for the Supabase row / admin dashboard.
 function buildScheduleSummaryText(booking) {
   return booking.services
     .map((row) => `${formatMinutesToLabel(row.startMinutes)}-${formatMinutesToLabel(row.endMinutes)} ${row.name} ($${row.price})`)
     .join('; ');
 }
 
-// Sends the booking to Netlify Forms so the business owner can see it in the Netlify dashboard.
-// Fails silently when not running on Netlify (e.g. opening index.html directly) since there's
-// no submission endpoint in that case — the local booking flow above still works either way.
-function submitBookingToNetlify(booking) {
+// Saves the booking to Supabase so the business owner can see it on the admin dashboard.
+// Fails silently when Supabase hasn't been configured yet, or when testing locally via
+// file:// — the in-memory booking flow above still works either way.
+function submitBookingToSupabase(booking) {
   if (window.location.protocol === 'file:') return;
+  if (SUPABASE_URL.includes('YOUR_SUPABASE') || SUPABASE_ANON_KEY.includes('YOUR_SUPABASE')) return;
 
-  const payload = new URLSearchParams({
-    'form-name': 'booking',
-    reference: booking.reference,
-    fullName: booking.name,
-    phone: booking.phone,
-    email: booking.email,
-    bookingDate: booking.date,
-    timeSlot: formatMinutesToLabel(booking.startMinutes),
-    services: buildScheduleSummaryText(booking),
-    notes: booking.notes,
-  });
-
-  fetch('/', {
+  fetch(`${SUPABASE_URL}/rest/v1/bookings`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: payload.toString(),
+    headers: {
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+      'Content-Type': 'application/json',
+      Prefer: 'return=minimal',
+    },
+    body: JSON.stringify({
+      reference: booking.reference,
+      full_name: booking.name,
+      phone: booking.phone,
+      email: booking.email,
+      booking_date: booking.date,
+      start_time: formatMinutesToLabel(booking.startMinutes),
+      services: buildScheduleSummaryText(booking),
+      total_price: booking.totalPrice,
+      notes: booking.notes,
+    }),
   }).catch(() => {
-    /* Not deployed on Netlify (e.g. local file), or offline — ignore. */
+    /* Supabase unreachable/misconfigured — ignore, the local booking flow already succeeded. */
   });
 }
 
@@ -546,8 +552,6 @@ function resetBookingForm() {
   form.reset();
   selectedServiceIds = [];
   selectedStartMinutes = null;
-  document.getElementById('timeSlotInput').value = '';
-  document.getElementById('servicesSummaryInput').value = '';
 
   form.querySelectorAll('.service-checkbox').forEach((label) => label.classList.remove('checked'));
   form.querySelectorAll('input, select, textarea').forEach((el) => {

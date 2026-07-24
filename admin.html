@@ -6,7 +6,6 @@
   <title>Admin | Excel Booking Center</title>
   <meta name="robots" content="noindex, nofollow" />
   <link rel="stylesheet" href="css/style.css" />
-  <script defer src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 </head>
 <body>
 
@@ -16,7 +15,6 @@
         <span class="logo-mark" aria-hidden="true">EBC</span>
         <span class="logo-text">Excel Booking Center &mdash; Admin</span>
       </a>
-      <div id="authArea"></div>
     </div>
   </header>
 
@@ -26,10 +24,20 @@
 
         <div id="loggedOutView">
           <h1 class="section-title">Admin Access</h1>
-          <p class="section-subtitle">Log in with your Netlify Identity account to view customer bookings.</p>
-          <div style="text-align:center;">
-            <button class="btn btn-primary btn-lg" id="loginBtn">Log In</button>
-          </div>
+          <p class="section-subtitle">Log in with the admin account created in Supabase to view customer bookings.</p>
+
+          <form class="admin-login-form" id="loginForm" novalidate>
+            <div class="form-group">
+              <label for="loginEmail">Email</label>
+              <input type="email" id="loginEmail" name="loginEmail" autocomplete="username" />
+            </div>
+            <div class="form-group">
+              <label for="loginPassword">Password</label>
+              <input type="password" id="loginPassword" name="loginPassword" autocomplete="current-password" />
+            </div>
+            <p class="admin-status" id="loginStatus"></p>
+            <button type="submit" class="btn btn-primary btn-lg">Log In</button>
+          </form>
         </div>
 
         <div id="loggedInView" class="hidden">
@@ -53,6 +61,7 @@
                   <th>Email</th>
                   <th>Date</th>
                   <th>Service(s) &amp; Times</th>
+                  <th>Total</th>
                   <th>Notes</th>
                   <th>Submitted</th>
                 </tr>
@@ -71,12 +80,45 @@
   <script>
     'use strict';
 
+    // Same project config as js/script.js — replace with your real Supabase values.
+    const SUPABASE_URL = 'YOUR_SUPABASE_PROJECT_URL';
+    const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+
+    const SESSION_KEY = 'ebc_admin_session';
+
     // Formats an ISO timestamp as a short readable date/time for the admin table.
     function formatSubmittedAt(iso) {
       if (!iso) return '—';
       return new Date(iso).toLocaleString('en-US', {
         year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit',
       });
+    }
+
+    // Persists the logged-in admin's access token for this browser tab's session only.
+    function saveSession(session) {
+      sessionStorage.setItem(SESSION_KEY, JSON.stringify(session));
+    }
+    function loadSession() {
+      try {
+        return JSON.parse(sessionStorage.getItem(SESSION_KEY));
+      } catch {
+        return null;
+      }
+    }
+    function clearSession() {
+      sessionStorage.removeItem(SESSION_KEY);
+    }
+
+    // Logs an admin in against Supabase Auth using plain fetch (no SDK required).
+    async function login(email, password) {
+      const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+        method: 'POST',
+        headers: { apikey: SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error_description || data.msg || 'Login failed.');
+      return { accessToken: data.access_token, email };
     }
 
     // Renders the bookings array into the admin table, or shows the empty state.
@@ -95,41 +137,40 @@
       table.classList.remove('hidden');
       emptyState.classList.add('hidden');
 
-      bookings
-        .slice()
-        .sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt))
-        .forEach((b) => {
-          const row = document.createElement('tr');
-          row.innerHTML = `
-            <td>${b.reference || '—'}</td>
-            <td>${b.fullName || '—'}</td>
-            <td>${b.phone || '—'}</td>
-            <td>${b.email || '—'}</td>
-            <td>${b.date || '—'}</td>
-            <td>${(b.services || '—').split(';').join('<br />')}</td>
-            <td>${b.notes || '—'}</td>
-            <td>${formatSubmittedAt(b.submittedAt)}</td>
-          `;
-          tbody.appendChild(row);
-        });
+      bookings.forEach((b) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${b.reference || '—'}</td>
+          <td>${b.full_name || '—'}</td>
+          <td>${b.phone || '—'}</td>
+          <td>${b.email || '—'}</td>
+          <td>${b.booking_date || '—'}</td>
+          <td>${(b.services || '—').split(';').join('<br />')}</td>
+          <td>$${b.total_price ?? '—'}</td>
+          <td>${b.notes || '—'}</td>
+          <td>${formatSubmittedAt(b.created_at)}</td>
+        `;
+        tbody.appendChild(row);
+      });
     }
 
-    // Fetches bookings from the serverless function using the current Identity session token.
+    // Fetches bookings from Supabase's REST API using the logged-in admin's access token.
+    // Row Level Security on the `bookings` table only allows authenticated reads (see README),
+    // so this request is rejected unless accessToken belongs to a real logged-in admin.
     async function loadBookings() {
       const status = document.getElementById('adminStatus');
-      const user = window.netlifyIdentity.currentUser();
-      if (!user) return;
+      const session = loadSession();
+      if (!session) return;
 
       status.textContent = 'Loading bookings…';
       try {
-        const token = await user.jwt();
-        const res = await fetch('/.netlify/functions/get-bookings', {
-          headers: { Authorization: `Bearer ${token}` },
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/bookings?select=*&order=created_at.desc`, {
+          headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${session.accessToken}` },
         });
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Failed to load bookings.');
-        renderBookingsTable(data.bookings || []);
-        status.textContent = `${data.bookings.length} booking(s) loaded.`;
+        if (!res.ok) throw new Error(data.message || 'Failed to load bookings.');
+        renderBookingsTable(data);
+        status.textContent = `${data.length} booking(s) loaded.`;
       } catch (err) {
         status.textContent = `Error: ${err.message}`;
       }
@@ -142,27 +183,38 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      const identity = window.netlifyIdentity;
-      if (!identity) {
-        document.getElementById('adminStatus').textContent =
-          'Netlify Identity script failed to load. This page only works when deployed on Netlify with Identity enabled.';
-        return;
+      if (SUPABASE_URL.includes('YOUR_SUPABASE') || SUPABASE_ANON_KEY.includes('YOUR_SUPABASE')) {
+        document.getElementById('loginStatus').textContent =
+          'Supabase is not configured yet — add SUPABASE_URL and SUPABASE_ANON_KEY in admin.html and js/script.js.';
       }
 
-      identity.init();
+      document.getElementById('loginForm').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const status = document.getElementById('loginStatus');
+        const email = document.getElementById('loginEmail').value.trim();
+        const password = document.getElementById('loginPassword').value;
+        status.textContent = 'Logging in…';
+        try {
+          const session = await login(email, password);
+          saveSession(session);
+          status.textContent = '';
+          showLoggedIn(true);
+          loadBookings();
+        } catch (err) {
+          status.textContent = err.message;
+        }
+      });
 
-      document.getElementById('loginBtn').addEventListener('click', () => identity.open('login'));
-      document.getElementById('logoutBtn').addEventListener('click', () => identity.logout());
+      document.getElementById('logoutBtn').addEventListener('click', () => {
+        clearSession();
+        showLoggedIn(false);
+      });
+
       document.getElementById('refreshBtn').addEventListener('click', loadBookings);
 
-      identity.on('login', () => {
-        showLoggedIn(true);
-        loadBookings();
-      });
-      identity.on('logout', () => showLoggedIn(false));
-
-      showLoggedIn(!!identity.currentUser());
-      if (identity.currentUser()) loadBookings();
+      const existingSession = loadSession();
+      showLoggedIn(!!existingSession);
+      if (existingSession) loadBookings();
     });
   </script>
 </body>
