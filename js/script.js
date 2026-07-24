@@ -11,8 +11,8 @@
 // The anon key is meant to be public — Supabase enforces access with Row Level Security
 // policies on the `bookings` table (see README), not by keeping this key secret.
 // Replace both placeholders with your project's values from Supabase Settings -> API.
-const SUPABASE_URL = 'YOUR_SUPABASE_PROJECT_URL';
-const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+const SUPABASE_URL = 'https://btbykqususlhajdahrpg.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_pgAOYkhhIOALErwSJg1Hzw_p_-s2gHl';
 
 /* ---------- Data ---------- */
 // Master list of services offered. Rendered dynamically — never hard-coded in HTML.
