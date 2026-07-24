@@ -106,14 +106,12 @@ Bookings are saved to a **Supabase** project (a free hosted Postgres database wi
      using (true);
    ```
 3. **Create your admin login**: Authentication → Users → **Add user** → enter your email + a password (do this instead of letting people self-register, so only people you add can log in).
-4. **Get your API keys**: Project Settings → API → copy the **Project URL** and the **anon public** key.
-5. **Paste both values into this project** in two places — they must match exactly:
-   - `js/script.js`, near the top: `SUPABASE_URL` and `SUPABASE_ANON_KEY`
-   - `admin.html`, inside the `<script>` block: the same two constants
-6. Commit and push (or redeploy) so the live site picks up the values.
-7. Visit `/admin.html`, log in with the email/password from step 3.
+4. ~~Get your API keys and paste them into `js/script.js` / `admin.html`~~ — **already done.** `SUPABASE_URL` and `SUPABASE_ANON_KEY` (the publishable key) are wired in and verified working end-to-end against the live project.
+5. Visit `/admin.html` and log in with the email/password from step 3.
 
-The anon key is meant to be public — it's not a secret, since Supabase enforces who can read/write via the Row Level Security policies from step 2, not by hiding the key. Until steps 1–6 are done, the site still works end-to-end for customers (bookings just aren't saved anywhere beyond that browser's own session), and `admin.html` will show a "Supabase is not configured yet" message instead of a login error.
+The anon/publishable key is meant to be public — it's not a secret, since Supabase enforces who can read/write via the Row Level Security policies from step 2, not by hiding the key. Only step 3 (creating your own login) is left before `admin.html` is fully usable.
+
+**Note on the newer key format:** Supabase's docs recommend sending the publishable/secret key only on the `apikey` header, not also as `Authorization: Bearer <key>` — some setups will try to parse it as a JWT and reject it. Separately, if you ever test inserts directly with `curl`, use `Prefer: return=minimal` (which the app's own code already does) rather than `return=representation` — asking Postgres to hand back the inserted row applies the table's SELECT policy too, so it fails for a role (like `anon`) that can insert but isn't allowed to read the table back.
 
 ## Notes
 
