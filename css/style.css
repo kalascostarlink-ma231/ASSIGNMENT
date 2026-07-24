@@ -705,6 +705,33 @@ address a { color: var(--color-primary); font-weight: 600; }
 }
 .admin-table tbody tr:hover { background: var(--color-primary-light); }
 
+/* ---------- Status Badges ---------- */
+.status-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.status-pending { background: #FDF0D5; color: var(--color-accent-dark); }
+.status-confirmed { background: var(--color-primary-light); color: var(--color-primary); }
+
+/* ---------- Invoice / Print ---------- */
+.invoice-actions {
+  display: flex;
+  gap: var(--space-1);
+  margin-top: var(--space-2);
+}
+.invoice-actions .btn { flex: 1; }
+
+@media print {
+  .site-header, .site-footer, .no-print { display: none !important; }
+  body { background: var(--color-white); }
+  .confirmation-card { border: none; box-shadow: none; }
+}
+
 /* ---------- Scroll-triggered Fade-in ---------- */
 .fade-in {
   opacity: 0;

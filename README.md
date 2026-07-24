@@ -34,7 +34,8 @@ A fully responsive, interactive service booking website for **Excel Booking Cent
 ```
 EXCEL BOOKING PLATFORM/
 ├── index.html                       # Customer-facing site: semantic markup for all sections
-├── admin.html                       # Password-protected admin page for viewing bookings
+├── admin.html                       # Password-protected admin page: view bookings + confirm them
+├── check-booking.html               # Public page: customers look up their booking + invoice
 ├── css/
 │   └── style.css                    # All styling, custom properties, responsive rules
 ├── js/
@@ -105,13 +106,52 @@ Bookings are saved to a **Supabase** project (a free hosted Postgres database wi
      to authenticated
      using (true);
    ```
-3. **Create your admin login**: Authentication → Users → **Add user** → enter your email + a password (do this instead of letting people self-register, so only people you add can log in).
+3. **Create your admin login**: Authentication → Users → **Add user** → enter your email + a password (do this instead of letting people self-register, so only people you add can log in). — **already done**, using `contact@excelspa.com`. Please change that password to something stronger than `12345678` when you get a chance; it guards real customer data.
 4. ~~Get your API keys and paste them into `js/script.js` / `admin.html`~~ — **already done.** `SUPABASE_URL` and `SUPABASE_ANON_KEY` (the publishable key) are wired in and verified working end-to-end against the live project.
-5. Visit `/admin.html` and log in with the email/password from step 3.
+5. **Add booking status + a secure customer lookup** — open the SQL Editor and run:
+   ```sql
+   alter table bookings add column status text not null default 'pending';
 
-The anon/publishable key is meant to be public — it's not a secret, since Supabase enforces who can read/write via the Row Level Security policies from step 2, not by hiding the key. Only step 3 (creating your own login) is left before `admin.html` is fully usable.
+   create policy "Authenticated users can update bookings"
+     on bookings for update
+     to authenticated
+     using (true)
+     with check (true);
+
+   create or replace function get_booking_status(p_reference text, p_phone text)
+   returns table (
+     reference text,
+     status text,
+     full_name text,
+     booking_date date,
+     start_time text,
+     services text,
+     total_price numeric,
+     notes text
+   )
+   language sql
+   security definer
+   set search_path = public
+   as $$
+     select reference, status, full_name, booking_date, start_time, services, total_price, notes
+     from bookings
+     where reference = p_reference and phone = p_phone;
+   $$;
+
+   grant execute on function get_booking_status(text, text) to anon;
+   ```
+6. Visit `/admin.html` and log in with the email/password from step 3.
+
+The anon/publishable key is meant to be public — it's not a secret, since Supabase enforces who can read/write via the Row Level Security policies from step 2, not by hiding the key.
 
 **Note on the newer key format:** Supabase's docs recommend sending the publishable/secret key only on the `apikey` header, not also as `Authorization: Bearer <key>` — some setups will try to parse it as a JWT and reject it. Separately, if you ever test inserts directly with `curl`, use `Prefer: return=minimal` (which the app's own code already does) rather than `return=representation` — asking Postgres to hand back the inserted row applies the table's SELECT policy too, so it fails for a role (like `anon`) that can insert but isn't allowed to read the table back.
+
+### Booking confirmation workflow
+
+Every booking is saved with `status = 'pending'`. The customer still gets instant, on-page confirmation the moment they submit (that part hasn't changed) — `pending` vs `confirmed` is purely an internal tracking state for you:
+
+- **`/admin.html`** now shows a status badge per row, filter tabs (All / Pending / Confirmed), and a **Confirm** button on pending rows — click it once you've verified you can actually staff that slot.
+- **`/check-booking.html`** (linked from the site footer and from the confirmation screen) lets a customer look up their own booking later using their **reference number + phone number** together. It shows current status and a printable invoice (a "Print Invoice" button that uses the browser's own print dialog — no PDF library needed). The lookup runs through a Postgres function (`get_booking_status`) rather than a direct table read, so it only ever returns a row when both the reference and phone match — nobody can browse anyone else's bookings this way.
 
 ## Notes
 

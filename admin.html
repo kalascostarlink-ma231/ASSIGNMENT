@@ -51,10 +51,17 @@
 
           <p id="adminStatus" class="admin-status"></p>
 
+          <div class="filter-bar" id="statusFilterBar">
+            <button class="filter-btn active" data-status="all">All</button>
+            <button class="filter-btn" data-status="pending">Pending</button>
+            <button class="filter-btn" data-status="confirmed">Confirmed</button>
+          </div>
+
           <div class="admin-table-wrap">
             <table class="admin-table" id="bookingsTable">
               <thead>
                 <tr>
+                  <th>Status</th>
                   <th>Reference</th>
                   <th>Name</th>
                   <th>Phone</th>
@@ -64,6 +71,7 @@
                   <th>Total</th>
                   <th>Notes</th>
                   <th>Submitted</th>
+                  <th>Action</th>
                 </tr>
               </thead>
               <tbody id="bookingsTableBody"></tbody>
@@ -121,6 +129,11 @@
       return { accessToken: data.access_token, email };
     }
 
+// All bookings currently loaded from Supabase, kept so the status filter can re-render
+    // without an extra network request.
+    let loadedBookings = [];
+    let activeStatusFilter = 'all';
+
     // Renders the bookings array into the admin table, or shows the empty state.
     function renderBookingsTable(bookings) {
       const tbody = document.getElementById('bookingsTableBody');
@@ -128,7 +141,11 @@
       const table = document.getElementById('bookingsTable');
       tbody.innerHTML = '';
 
-      if (!bookings.length) {
+      const filtered = activeStatusFilter === 'all'
+        ? bookings
+        : bookings.filter((b) => (b.status || 'pending') === activeStatusFilter);
+
+      if (!filtered.length) {
         table.classList.add('hidden');
         emptyState.classList.remove('hidden');
         return;
@@ -137,9 +154,11 @@
       table.classList.remove('hidden');
       emptyState.classList.add('hidden');
 
-      bookings.forEach((b) => {
+      filtered.forEach((b) => {
+        const status = b.status || 'pending';
         const row = document.createElement('tr');
         row.innerHTML = `
+          <td><span class="status-badge status-${status}">${status}</span></td>
           <td>${b.reference || '—'}</td>
           <td>${b.full_name || '—'}</td>
           <td>${b.phone || '—'}</td>
@@ -149,6 +168,9 @@
           <td>$${b.total_price ?? '—'}</td>
           <td>${b.notes || '—'}</td>
           <td>${formatSubmittedAt(b.created_at)}</td>
+          <td>${status === 'pending'
+            ? `<button type="button" class="btn btn-secondary confirm-btn" data-ref="${b.reference}">Confirm</button>`
+            : '—'}</td>
         `;
         tbody.appendChild(row);
       });
@@ -169,8 +191,37 @@
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.message || 'Failed to load bookings.');
-        renderBookingsTable(data);
+        loadedBookings = data;
+        renderBookingsTable(loadedBookings);
         status.textContent = `${data.length} booking(s) loaded.`;
+      } catch (err) {
+        status.textContent = `Error: ${err.message}`;
+      }
+    }
+
+    // Marks a pending booking as confirmed once the admin has verified availability/staffing.
+    async function confirmBooking(reference) {
+      const status = document.getElementById('adminStatus');
+      const session = loadSession();
+      if (!session) return;
+
+      status.textContent = `Confirming ${reference}…`;
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/bookings?reference=eq.${encodeURIComponent(reference)}`, {
+          method: 'PATCH',
+          headers: {
+            apikey: SUPABASE_ANON_KEY,
+            Authorization: `Bearer ${session.accessToken}`,
+            'Content-Type': 'application/json',
+            Prefer: 'return=minimal',
+          },
+          body: JSON.stringify({ status: 'confirmed' }),
+        });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data.message || 'Failed to confirm booking.');
+        }
+        await loadBookings();
       } catch (err) {
         status.textContent = `Error: ${err.message}`;
       }
@@ -211,6 +262,21 @@
       });
 
       document.getElementById('refreshBtn').addEventListener('click', loadBookings);
+
+      document.getElementById('statusFilterBar').addEventListener('click', (event) => {
+        const btn = event.target.closest('.filter-btn');
+        if (!btn) return;
+        document.querySelectorAll('#statusFilterBar .filter-btn').forEach((b) => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeStatusFilter = btn.dataset.status;
+        renderBookingsTable(loadedBookings);
+      });
+
+      document.getElementById('bookingsTableBody').addEventListener('click', (event) => {
+        const btn = event.target.closest('.confirm-btn');
+        if (!btn) return;
+        confirmBooking(btn.dataset.ref);
+      });
 
       const existingSession = loadSession();
       showLoggedIn(!!existingSession);

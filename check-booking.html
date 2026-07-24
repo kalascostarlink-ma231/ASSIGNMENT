@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Check My Booking | Excel Booking Center</title>
+  <meta name="description" content="Look up your Excel Booking Center appointment status and invoice." />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <header class="site-header" id="top">
+    <div class="container header-inner">
+      <a href="index.html" class="logo" aria-label="Excel Booking Center home">
+        <span class="logo-mark" aria-hidden="true">EBC</span>
+        <span class="logo-text">Excel Booking Center</span>
+      </a>
+    </div>
+  </header>
+
+  <main>
+    <section class="admin-section">
+      <div class="container">
+        <h1 class="section-title">Check My Booking</h1>
+        <p class="section-subtitle">Enter your booking reference and the phone number you booked with to see its status and invoice.</p>
+
+        <form class="admin-login-form" id="lookupForm" novalidate>
+          <div class="form-group">
+            <label for="lookupReference">Booking Reference</label>
+            <input type="text" id="lookupReference" placeholder="e.g. EBC-2026-4821" />
+          </div>
+          <div class="form-group">
+            <label for="lookupPhone">Phone Number</label>
+            <input type="tel" id="lookupPhone" placeholder="The number you booked with" />
+          </div>
+          <p class="admin-status" id="lookupStatus"></p>
+          <button type="submit" class="btn btn-primary btn-lg">Check Status</button>
+        </form>
+
+        <div class="confirmation-card hidden" id="invoiceCard">
+          <h3>Booking Invoice</h3>
+          <p class="confirmation-ref">
+            Reference: <strong id="inv-reference"></strong>
+            &nbsp;&middot;&nbsp;
+            <span class="status-badge" id="inv-status"></span>
+          </p>
+          <dl class="summary-list">
+            <dt>Name</dt><dd id="inv-name"></dd>
+            <dt>Date</dt><dd id="inv-date"></dd>
+            <dt>Start Time</dt><dd id="inv-time"></dd>
+          </dl>
+          <div class="schedule-list" id="inv-services"></div>
+          <div class="summary-total">
+            <span>Total</span>
+            <span id="inv-total"></span>
+          </div>
+          <div class="invoice-actions no-print">
+            <button type="button" class="btn btn-secondary" id="printInvoiceBtn">Print Invoice</button>
+            <button type="button" class="btn btn-secondary" id="lookupAnotherBtn">Check Another Booking</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-bottom">
+      <p>&copy; <span id="currentYear"></span> Excel Booking Center, Monrovia, Liberia. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script>
+    'use strict';
+
+    // Same project config as js/script.js.
+    const SUPABASE_URL = 'https://btbykqususlhajdahrpg.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_pgAOYkhhIOALErwSJg1Hzw_p_-s2gHl';
+
+    // Formats a YYYY-MM-DD date string as a readable date, matching the main site.
+    function formatDate(isoDate) {
+      if (!isoDate) return '—';
+      const [year, month, day] = isoDate.split('-').map(Number);
+      return new Date(year, month - 1, day).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    }
+
+    // Renders the semicolon-separated "time range service (price)" summary as invoice rows.
+    function renderInvoiceServices(servicesText) {
+      const container = document.getElementById('inv-services');
+      container.innerHTML = '';
+      (servicesText || '').split(';').map((s) => s.trim()).filter(Boolean).forEach((line) => {
+        const match = line.match(/^(.*?)\s([^$]+?)\s\(\$(\d+(?:\.\d+)?)\)$/);
+        const row = document.createElement('div');
+        row.className = 'schedule-row';
+        if (match) {
+          row.innerHTML = `
+            <span class="schedule-time">${match[1]}</span>
+            <span class="schedule-service">${match[2]}</span>
+            <span class="schedule-price">$${match[3]}</span>
+          `;
+        } else {
+          row.innerHTML = `<span class="schedule-service">${line}</span>`;
+        }
+        container.appendChild(row);
+      });
+    }
+
+    // Looks up a single booking via a security-definer RPC — this only ever returns a row when
+    // both the reference AND the phone number match, so no one can browse other customers' data.
+    async function lookupBooking(reference, phone) {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_booking_status`, {
+        method: 'POST',
+        headers: { apikey: SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ p_reference: reference, p_phone: phone }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Lookup failed. Please try again.');
+      return data[0] || null;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+      if (SUPABASE_URL.includes('YOUR_SUPABASE') || SUPABASE_ANON_KEY.includes('YOUR_SUPABASE')) {
+        document.getElementById('lookupStatus').textContent = 'Booking lookup is not configured yet.';
+      }
+
+      document.getElementById('lookupForm').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const status = document.getElementById('lookupStatus');
+        const reference = document.getElementById('lookupReference').value.trim();
+        const phone = document.getElementById('lookupPhone').value.trim();
+
+        if (!reference || !phone) {
+          status.textContent = 'Please enter both your reference number and phone number.';
+          return;
+        }
+
+        status.textContent = 'Looking up your booking…';
+        document.getElementById('invoiceCard').classList.add('hidden');
+
+        try {
+          const booking = await lookupBooking(reference, phone);
+          if (!booking) {
+            status.textContent = 'No booking found with that reference and phone number. Please double-check both.';
+            return;
+          }
+
+          status.textContent = '';
+          document.getElementById('inv-reference').textContent = booking.reference;
+          document.getElementById('inv-status').textContent = booking.status;
+          document.getElementById('inv-status').className = `status-badge status-${booking.status}`;
+          document.getElementById('inv-name').textContent = booking.full_name;
+          document.getElementById('inv-date').textContent = formatDate(booking.booking_date);
+          document.getElementById('inv-time').textContent = booking.start_time;
+          document.getElementById('inv-total').textContent = `$${booking.total_price}`;
+          renderInvoiceServices(booking.services);
+          document.getElementById('invoiceCard').classList.remove('hidden');
+        } catch (err) {
+          status.textContent = err.message;
+        }
+      });
+
+      document.getElementById('printInvoiceBtn').addEventListener('click', () => window.print());
+
+      document.getElementById('lookupAnotherBtn').addEventListener('click', () => {
+        document.getElementById('lookupForm').reset();
+        document.getElementById('invoiceCard').classList.add('hidden');
+        document.getElementById('lookupStatus').textContent = '';
+      });
+    });
+  </script>
+</body>
+</html>

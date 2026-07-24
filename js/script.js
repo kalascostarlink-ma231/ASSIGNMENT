@@ -509,7 +509,6 @@ function submitBookingToSupabase(booking) {
     method: 'POST',
     headers: {
       apikey: SUPABASE_ANON_KEY,
-      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
       'Content-Type': 'application/json',
       Prefer: 'return=minimal',
     },
@@ -523,6 +522,7 @@ function submitBookingToSupabase(booking) {
       services: buildScheduleSummaryText(booking),
       total_price: booking.totalPrice,
       notes: booking.notes,
+      status: 'pending',
     }),
   }).catch(() => {
     /* Supabase unreachable/misconfigured — ignore, the local booking flow already succeeded. */
