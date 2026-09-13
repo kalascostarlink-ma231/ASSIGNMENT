@@ -1,173 +1,174 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Check My Booking | Excel Booking Center</title>
-  <meta name="description" content="Look up your Excel Booking Center appointment status and invoice." />
-  <link rel="stylesheet" href="css/style.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Track My Order | Excel Bakery</title>
+<meta name="description" content="Look up your Excel Bakery order status using your order reference and phone number.">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+CiAgPGNpcmNsZSBjeD0iMzIiIGN5PSIzMiIgcj0iMzIiIGZpbGw9IiNGQkYzRTciLz4KICA8cGF0aCBkPSJNMjEgNDAgTDQzIDQwIEwzOSA1NyBMMjUgNTcgWiIgZmlsbD0iIzdBMjQzNiIvPgogIDxwYXRoIGQ9Ik0yNS41IDQxIEwyNy41IDU2IiBzdHJva2U9IiNDODlCM0MiIHN0cm9rZS13aWR0aD0iMS40IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KICA8cGF0aCBkPSJNMzIgNDEgTDMyIDU2IiBzdHJva2U9IiNDODlCM0MiIHN0cm9rZS13aWR0aD0iMS40IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KICA8cGF0aCBkPSJNMzguNSA0MSBMMzYuNSA1NiIgc3Ryb2tlPSIjQzg5QjNDIiBzdHJva2Utd2lkdGg9IjEuNCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+CiAgPHBhdGggZD0iTTE1IDQwIEMxNSAyNyAyMiAxNyAzMiAxNyBDNDIgMTcgNDkgMjcgNDkgNDAgQzQzIDMzIDM4IDM3IDMyIDMyIEMyNiAzNyAyMSAzMyAxNSA0MCBaIiBmaWxsPSIjRkZGREY4Ii8+CiAgPGNpcmNsZSBjeD0iMzIiIGN5PSIxNSIgcj0iMy40IiBmaWxsPSIjQzg5QjNDIi8+Cjwvc3ZnPgo=">
+<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-  <header class="site-header" id="top">
-    <div class="container header-inner">
-      <a href="index.html" class="logo" aria-label="Excel Booking Center home">
-        <span class="logo-mark" aria-hidden="true">EBC</span>
-        <span class="logo-text">Excel Booking Center</span>
-      </a>
+<!-- ===================== HEADER ===================== -->
+<header class="site-header">
+  <div class="container">
+    <a href="index.html" class="brand">
+      <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+CiAgPGNpcmNsZSBjeD0iMzIiIGN5PSIzMiIgcj0iMzIiIGZpbGw9IiNGQkYzRTciLz4KICA8cGF0aCBkPSJNMjEgNDAgTDQzIDQwIEwzOSA1NyBMMjUgNTcgWiIgZmlsbD0iIzdBMjQzNiIvPgogIDxwYXRoIGQ9Ik0yNS41IDQxIEwyNy41IDU2IiBzdHJva2U9IiNDODlCM0MiIHN0cm9rZS13aWR0aD0iMS40IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KICA8cGF0aCBkPSJNMzIgNDEgTDMyIDU2IiBzdHJva2U9IiNDODlCM0MiIHN0cm9rZS13aWR0aD0iMS40IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KICA8cGF0aCBkPSJNMzguNSA0MSBMMzYuNSA1NiIgc3Ryb2tlPSIjQzg5QjNDIiBzdHJva2Utd2lkdGg9IjEuNCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+CiAgPHBhdGggZD0iTTE1IDQwIEMxNSAyNyAyMiAxNyAzMiAxNyBDNDIgMTcgNDkgMjcgNDkgNDAgQzQzIDMzIDM4IDM3IDMyIDMyIEMyNiAzNyAyMSAzMyAxNSA0MCBaIiBmaWxsPSIjRkZGREY4Ii8+CiAgPGNpcmNsZSBjeD0iMzIiIGN5PSIxNSIgcj0iMy40IiBmaWxsPSIjQzg5QjNDIi8+Cjwvc3ZnPgo=" alt="Excel Bakery logo">
+      <span class="brand-text">
+        <span class="name">Excel Bakery</span>
+        <span class="tag">Track My Order</span>
+      </span>
+    </a>
+    <div class="header-actions">
+      <a href="index.html" class="btn btn-outline">← Back to Site</a>
     </div>
-  </header>
+  </div>
+</header>
 
-  <main>
-    <section class="admin-section">
-      <div class="container">
-        <h1 class="section-title">Check My Booking</h1>
-        <p class="section-subtitle">Enter your booking reference and the phone number you booked with to see its status and invoice.</p>
+<!-- ===================== LOOKUP ===================== -->
+<section class="section lookup-page">
+  <div class="container lookup-container">
 
-        <form class="admin-login-form" id="lookupForm" novalidate>
-          <div class="form-group">
-            <label for="lookupReference">Booking Reference</label>
-            <input type="text" id="lookupReference" placeholder="e.g. EBC-2026-4821" />
-          </div>
-          <div class="form-group">
-            <label for="lookupPhone">Phone Number</label>
-            <input type="tel" id="lookupPhone" placeholder="The number you booked with" />
-          </div>
-          <p class="admin-status" id="lookupStatus"></p>
-          <button type="submit" class="btn btn-primary btn-lg">Check Status</button>
-        </form>
-
-        <div class="confirmation-card hidden" id="invoiceCard">
-          <h3>Booking Invoice</h3>
-          <p class="confirmation-ref">
-            Reference: <strong id="inv-reference"></strong>
-            &nbsp;&middot;&nbsp;
-            <span class="status-badge" id="inv-status"></span>
-          </p>
-          <dl class="summary-list">
-            <dt>Name</dt><dd id="inv-name"></dd>
-            <dt>Date</dt><dd id="inv-date"></dd>
-            <dt>Start Time</dt><dd id="inv-time"></dd>
-          </dl>
-          <div class="schedule-list" id="inv-services"></div>
-          <div class="summary-total">
-            <span>Total</span>
-            <span id="inv-total"></span>
-          </div>
-          <div class="invoice-actions no-print">
-            <button type="button" class="btn btn-secondary" id="printInvoiceBtn">Print Invoice</button>
-            <button type="button" class="btn btn-secondary" id="lookupAnotherBtn">Check Another Booking</button>
-          </div>
-        </div>
+    <div class="section-head">
+      <div>
+        <h2>Track My Order</h2>
+        <p>Enter your order reference and the phone number you ordered with to see its status.</p>
       </div>
-    </section>
-  </main>
-
-  <footer class="site-footer">
-    <div class="container footer-bottom">
-      <p>&copy; <span id="currentYear"></span> Excel Booking Center, Monrovia, Liberia. All rights reserved.</p>
     </div>
-  </footer>
 
-  <script>
-    'use strict';
+    <form class="lookup-form" id="lookup-form">
+      <div class="field">
+        <label for="lookup-ref">Order Reference</label>
+        <input type="text" id="lookup-ref" placeholder="e.g. EB-482913" required>
+      </div>
+      <div class="field">
+        <label for="lookup-phone">Phone Number</label>
+        <input type="tel" id="lookup-phone" placeholder="The number you ordered with" required>
+      </div>
+      <p class="lookup-status" id="lookup-status"></p>
+      <button type="submit" class="btn btn-primary btn-block">Check Status</button>
+    </form>
 
-    // Same project config as js/script.js.
-    const SUPABASE_URL = 'https://btbykqususlhajdahrpg.supabase.co';
-    const SUPABASE_ANON_KEY = 'sb_publishable_pgAOYkhhIOALErwSJg1Hzw_p_-s2gHl';
+    <div class="invoice-card hidden" id="invoice-card">
+      <div class="invoice-head">
+        <h3>Order Invoice</h3>
+        <span class="status-pill" id="inv-status"></span>
+      </div>
+      <div class="invoice-ref">Reference: <strong id="inv-ref"></strong></div>
 
-    // Formats a YYYY-MM-DD date string as a readable date, matching the main site.
-    function formatDate(isoDate) {
-      if (!isoDate) return '—';
-      const [year, month, day] = isoDate.split('-').map(Number);
-      return new Date(year, month - 1, day).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-    }
+      <dl class="summary-list">
+        <dt>Name</dt><dd id="inv-name"></dd>
+        <dt>Delivery Address</dt><dd id="inv-address"></dd>
+        <dt>Placed</dt><dd id="inv-placed"></dd>
+      </dl>
 
-    // Renders the semicolon-separated "time range service (price)" summary as invoice rows.
-    function renderInvoiceServices(servicesText) {
-      const container = document.getElementById('inv-services');
-      container.innerHTML = '';
-      (servicesText || '').split(';').map((s) => s.trim()).filter(Boolean).forEach((line) => {
-        const match = line.match(/^(.*?)\s([^$]+?)\s\(\$(\d+(?:\.\d+)?)\)$/);
-        const row = document.createElement('div');
-        row.className = 'schedule-row';
-        if (match) {
-          row.innerHTML = `
-            <span class="schedule-time">${match[1]}</span>
-            <span class="schedule-service">${match[2]}</span>
-            <span class="schedule-price">$${match[3]}</span>
-          `;
-        } else {
-          row.innerHTML = `<span class="schedule-service">${line}</span>`;
-        }
-        container.appendChild(row);
-      });
-    }
+      <ul class="order-items-list" id="inv-items"></ul>
 
-    // Looks up a single booking via a security-definer RPC — this only ever returns a row when
-    // both the reference AND the phone number match, so no one can browse other customers' data.
-    async function lookupBooking(reference, phone) {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_booking_status`, {
-        method: 'POST',
-        headers: { apikey: SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ p_reference: reference, p_phone: phone }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Lookup failed. Please try again.');
-      return data[0] || null;
-    }
+      <div class="summary-row"><span>Subtotal</span><span id="inv-subtotal"></span></div>
+      <div class="summary-row"><span>Delivery Fee</span><span id="inv-delivery"></span></div>
+      <div class="summary-row total"><span>Total</span><span id="inv-total"></span></div>
 
-    document.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('currentYear').textContent = new Date().getFullYear();
+      <div class="invoice-actions no-print">
+        <button type="button" class="btn btn-outline" id="print-invoice-btn">Print Invoice</button>
+        <button type="button" class="btn btn-outline" id="lookup-another-btn">Check Another Order</button>
+      </div>
+    </div>
 
-      if (SUPABASE_URL.includes('YOUR_SUPABASE') || SUPABASE_ANON_KEY.includes('YOUR_SUPABASE')) {
-        document.getElementById('lookupStatus').textContent = 'Booking lookup is not configured yet.';
-      }
+  </div>
+</section>
 
-      document.getElementById('lookupForm').addEventListener('submit', async (event) => {
-        event.preventDefault();
-        const status = document.getElementById('lookupStatus');
-        const reference = document.getElementById('lookupReference').value.trim();
-        const phone = document.getElementById('lookupPhone').value.trim();
+<!-- ===================== FOOTER ===================== -->
+<footer class="site-footer">
+  <div class="container footer-bottom">
+    <span>© 2026 Excel Bakery. All rights reserved.</span>
+    <span>Freshly Baked, Always Exceptional</span>
+  </div>
+</footer>
 
-        if (!reference || !phone) {
-          status.textContent = 'Please enter both your reference number and phone number.';
-          return;
-        }
+<script>
+'use strict';
 
-        status.textContent = 'Looking up your booking…';
-        document.getElementById('invoiceCard').classList.add('hidden');
+const ORDERS_KEY = 'excelBakeryOrders';
 
-        try {
-          const booking = await lookupBooking(reference, phone);
-          if (!booking) {
-            status.textContent = 'No booking found with that reference and phone number. Please double-check both.';
-            return;
-          }
+function loadOrders() {
+  try {
+    return JSON.parse(localStorage.getItem(ORDERS_KEY)) || [];
+  } catch (e) {
+    return [];
+  }
+}
 
-          status.textContent = '';
-          document.getElementById('inv-reference').textContent = booking.reference;
-          document.getElementById('inv-status').textContent = booking.status;
-          document.getElementById('inv-status').className = `status-badge status-${booking.status}`;
-          document.getElementById('inv-name').textContent = booking.full_name;
-          document.getElementById('inv-date').textContent = formatDate(booking.booking_date);
-          document.getElementById('inv-time').textContent = booking.start_time;
-          document.getElementById('inv-total').textContent = `$${booking.total_price}`;
-          renderInvoiceServices(booking.services);
-          document.getElementById('invoiceCard').classList.remove('hidden');
-        } catch (err) {
-          status.textContent = err.message;
-        }
-      });
+function normalizePhone(value) {
+  return (value || '').replace(/\D/g, '');
+}
 
-      document.getElementById('printInvoiceBtn').addEventListener('click', () => window.print());
+function formatPlacedAt(iso) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleString('en-US', {
+    year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit',
+  });
+}
 
-      document.getElementById('lookupAnotherBtn').addEventListener('click', () => {
-        document.getElementById('lookupForm').reset();
-        document.getElementById('invoiceCard').classList.add('hidden');
-        document.getElementById('lookupStatus').textContent = '';
-      });
-    });
-  </script>
+function findOrder(ref, phone) {
+  const orders = loadOrders();
+  const normalizedPhone = normalizePhone(phone);
+  return orders.find((o) =>
+    o.ref.trim().toLowerCase() === ref.trim().toLowerCase() &&
+    normalizePhone(o.phone) === normalizedPhone
+  );
+}
+
+function renderInvoice(order) {
+  const status = order.status || 'new';
+  document.getElementById('inv-status').textContent = status;
+  document.getElementById('inv-status').className = `status-pill ${status}`;
+  document.getElementById('inv-ref').textContent = order.ref;
+  document.getElementById('inv-name').textContent = order.name || '—';
+  document.getElementById('inv-address').textContent = order.address || '—';
+  document.getElementById('inv-placed').textContent = formatPlacedAt(order.placedAt);
+
+  document.getElementById('inv-items').innerHTML = (order.items || [])
+    .map((item) => `<li>${item.qty} × ${item.name} — $${(item.price * item.qty).toFixed(2)}</li>`)
+    .join('');
+
+  document.getElementById('inv-subtotal').textContent = `$${(order.subtotal || 0).toFixed(2)}`;
+  document.getElementById('inv-delivery').textContent = `$${(order.deliveryFee || 0).toFixed(2)}`;
+  document.getElementById('inv-total').textContent = `$${(order.total || 0).toFixed(2)}`;
+
+  document.getElementById('invoice-card').classList.remove('hidden');
+}
+
+document.getElementById('lookup-form').addEventListener('submit', (event) => {
+  event.preventDefault();
+  const status = document.getElementById('lookup-status');
+  const ref = document.getElementById('lookup-ref').value.trim();
+  const phone = document.getElementById('lookup-phone').value.trim();
+
+  document.getElementById('invoice-card').classList.add('hidden');
+
+  if (!ref || !phone) {
+    status.textContent = 'Please enter both your order reference and phone number.';
+    return;
+  }
+
+  const order = findOrder(ref, phone);
+  if (!order) {
+    status.textContent = 'No order found with that reference and phone number on this browser. Please double-check both, or note that order lookup only works on the device the order was placed from.';
+    return;
+  }
+
+  status.textContent = '';
+  renderInvoice(order);
+});
+
+document.getElementById('print-invoice-btn').addEventListener('click', () => window.print());
+
+document.getElementById('lookup-another-btn').addEventListener('click', () => {
+  document.getElementById('lookup-form').reset();
+  document.getElementById('invoice-card').classList.add('hidden');
+  document.getElementById('lookup-status').textContent = '';
+});
+</script>
 </body>
 </html>

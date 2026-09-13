@@ -1,287 +1,223 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin | Excel Booking Center</title>
-  <meta name="robots" content="noindex, nofollow" />
-  <link rel="stylesheet" href="css/style.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin | Excel Bakery</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+CiAgPGNpcmNsZSBjeD0iMzIiIGN5PSIzMiIgcj0iMzIiIGZpbGw9IiNGQkYzRTciLz4KICA8cGF0aCBkPSJNMjEgNDAgTDQzIDQwIEwzOSA1NyBMMjUgNTcgWiIgZmlsbD0iIzdBMjQzNiIvPgogIDxwYXRoIGQ9Ik0yNS41IDQxIEwyNy41IDU2IiBzdHJva2U9IiNDODlCM0MiIHN0cm9rZS13aWR0aD0iMS40IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KICA8cGF0aCBkPSJNMzIgNDEgTDMyIDU2IiBzdHJva2U9IiNDODlCM0MiIHN0cm9rZS13aWR0aD0iMS40IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KICA8cGF0aCBkPSJNMzguNSA0MSBMMzYuNSA1NiIgc3Ryb2tlPSIjQzg5QjNDIiBzdHJva2Utd2lkdGg9IjEuNCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+CiAgPHBhdGggZD0iTTE1IDQwIEMxNSAyNyAyMiAxNyAzMiAxNyBDNDIgMTcgNDkgMjcgNDkgNDAgQzQzIDMzIDM4IDM3IDMyIDMyIEMyNiAzNyAyMSAzMyAxNSA0MCBaIiBmaWxsPSIjRkZGREY4Ii8+CiAgPGNpcmNsZSBjeD0iMzIiIGN5PSIxNSIgcj0iMy40IiBmaWxsPSIjQzg5QjNDIi8+Cjwvc3ZnPgo=">
+<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-  <header class="site-header">
-    <div class="container header-inner">
-      <a href="index.html" class="logo" aria-label="Excel Booking Center home">
-        <span class="logo-mark" aria-hidden="true">EBC</span>
-        <span class="logo-text">Excel Booking Center &mdash; Admin</span>
-      </a>
+<!-- ===================== HEADER ===================== -->
+<header class="site-header">
+  <div class="container">
+    <a href="index.html" class="brand">
+      <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+CiAgPGNpcmNsZSBjeD0iMzIiIGN5PSIzMiIgcj0iMzIiIGZpbGw9IiNGQkYzRTciLz4KICA8cGF0aCBkPSJNMjEgNDAgTDQzIDQwIEwzOSA1NyBMMjUgNTcgWiIgZmlsbD0iIzdBMjQzNiIvPgogIDxwYXRoIGQ9Ik0yNS41IDQxIEwyNy41IDU2IiBzdHJva2U9IiNDODlCM0MiIHN0cm9rZS13aWR0aD0iMS40IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KICA8cGF0aCBkPSJNMzIgNDEgTDMyIDU2IiBzdHJva2U9IiNDODlCM0MiIHN0cm9rZS13aWR0aD0iMS40IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KICA8cGF0aCBkPSJNMzguNSA0MSBMMzYuNSA1NiIgc3Ryb2tlPSIjQzg5QjNDIiBzdHJva2Utd2lkdGg9IjEuNCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+CiAgPHBhdGggZD0iTTE1IDQwIEMxNSAyNyAyMiAxNyAzMiAxNyBDNDIgMTcgNDkgMjcgNDkgNDAgQzQzIDMzIDM4IDM3IDMyIDMyIEMyNiAzNyAyMSAzMyAxNSA0MCBaIiBmaWxsPSIjRkZGREY4Ii8+CiAgPGNpcmNsZSBjeD0iMzIiIGN5PSIxNSIgcj0iMy40IiBmaWxsPSIjQzg5QjNDIi8+Cjwvc3ZnPgo=" alt="Excel Bakery logo">
+      <span class="brand-text">
+        <span class="name">Excel Bakery</span>
+        <span class="tag">Admin — Orders</span>
+      </span>
+    </a>
+    <div class="header-actions">
+      <a href="index.html" class="btn btn-outline">← Back to Site</a>
     </div>
-  </header>
+  </div>
+</header>
 
-  <main>
-    <section class="admin-section">
-      <div class="container">
+<!-- ===================== ADMIN ===================== -->
+<section class="section admin-page">
+  <div class="container">
 
-        <div id="loggedOutView">
-          <h1 class="section-title">Admin Access</h1>
-          <p class="section-subtitle">Log in with the admin account created in Supabase to view customer bookings.</p>
-
-          <form class="admin-login-form" id="loginForm" novalidate>
-            <div class="form-group">
-              <label for="loginEmail">Email</label>
-              <input type="email" id="loginEmail" name="loginEmail" autocomplete="username" />
-            </div>
-            <div class="form-group">
-              <label for="loginPassword">Password</label>
-              <input type="password" id="loginPassword" name="loginPassword" autocomplete="current-password" />
-            </div>
-            <p class="admin-status" id="loginStatus"></p>
-            <button type="submit" class="btn btn-primary btn-lg">Log In</button>
-          </form>
-        </div>
-
-        <div id="loggedInView" class="hidden">
-          <div class="admin-toolbar">
-            <h1 class="section-title" style="margin:0;">Bookings</h1>
-            <div class="admin-toolbar-actions">
-              <button class="btn btn-secondary" id="refreshBtn">Refresh</button>
-              <button class="btn btn-secondary" id="logoutBtn">Log Out</button>
-            </div>
-          </div>
-
-          <p id="adminStatus" class="admin-status"></p>
-
-          <div class="filter-bar" id="statusFilterBar">
-            <button class="filter-btn active" data-status="all">All</button>
-            <button class="filter-btn" data-status="pending">Pending</button>
-            <button class="filter-btn" data-status="confirmed">Confirmed</button>
-          </div>
-
-          <div class="admin-table-wrap">
-            <table class="admin-table" id="bookingsTable">
-              <thead>
-                <tr>
-                  <th>Status</th>
-                  <th>Reference</th>
-                  <th>Name</th>
-                  <th>Phone</th>
-                  <th>Email</th>
-                  <th>Date</th>
-                  <th>Service(s) &amp; Times</th>
-                  <th>Total</th>
-                  <th>Notes</th>
-                  <th>Submitted</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody id="bookingsTableBody"></tbody>
-            </table>
-          </div>
-
-          <p class="empty-state hidden" id="bookingsAdminEmpty">No bookings have been submitted yet.</p>
-        </div>
-
+    <div class="admin-header-row">
+      <div>
+        <h1>Orders</h1>
+        <p class="admin-note">Reads orders saved on this browser (localStorage). No backend is wired up yet — see the TODO in js/script.js to send orders to a real API.</p>
       </div>
-    </section>
-  </main>
+      <div class="admin-toolbar-actions">
+        <button type="button" class="btn btn-outline" id="refresh-btn">Refresh</button>
+        <button type="button" class="btn btn-outline" id="clear-btn">Clear All</button>
+      </div>
+    </div>
 
-  <script>
-    'use strict';
+    <div class="admin-summary-cards">
+      <div class="summary-card">
+        <strong id="stat-total">0</strong>
+        <span>Total Orders</span>
+      </div>
+      <div class="summary-card">
+        <strong id="stat-new">0</strong>
+        <span>New / Unfulfilled</span>
+      </div>
+      <div class="summary-card">
+        <strong id="stat-revenue">$0.00</strong>
+        <span>Revenue (non-cancelled)</span>
+      </div>
+    </div>
 
-    // Same project config as js/script.js — replace with your real Supabase values.
-    const SUPABASE_URL = 'https://btbykqususlhajdahrpg.supabase.co';
-    const SUPABASE_ANON_KEY = 'sb_publishable_pgAOYkhhIOALErwSJg1Hzw_p_-s2gHl';
+    <div class="filter-chips" id="filter-chips">
+      <button type="button" class="filter-chip active" data-status="all">All</button>
+      <button type="button" class="filter-chip" data-status="new">New</button>
+      <button type="button" class="filter-chip" data-status="fulfilled">Fulfilled</button>
+      <button type="button" class="filter-chip" data-status="cancelled">Cancelled</button>
+    </div>
 
-    const SESSION_KEY = 'ebc_admin_session';
+    <div class="orders-table-wrap" id="orders-table-wrap">
+      <table class="orders-table">
+        <thead>
+          <tr>
+            <th>Status</th>
+            <th>Order Ref</th>
+            <th>Customer</th>
+            <th>Items</th>
+            <th>Total</th>
+            <th>Placed</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="orders-table-body"></tbody>
+      </table>
+    </div>
 
-    // Formats an ISO timestamp as a short readable date/time for the admin table.
-    function formatSubmittedAt(iso) {
-      if (!iso) return '—';
-      return new Date(iso).toLocaleString('en-US', {
-        year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit',
-      });
-    }
+    <p class="admin-empty" id="orders-empty" style="display:none;">No orders have been placed on this browser yet.</p>
 
-    // Persists the logged-in admin's access token for this browser tab's session only.
-    function saveSession(session) {
-      sessionStorage.setItem(SESSION_KEY, JSON.stringify(session));
-    }
-    function loadSession() {
-      try {
-        return JSON.parse(sessionStorage.getItem(SESSION_KEY));
-      } catch {
-        return null;
-      }
-    }
-    function clearSession() {
-      sessionStorage.removeItem(SESSION_KEY);
-    }
+  </div>
+</section>
 
-    // Logs an admin in against Supabase Auth using plain fetch (no SDK required).
-    async function login(email, password) {
-      const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
-        method: 'POST',
-        headers: { apikey: SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error_description || data.msg || 'Login failed.');
-      return { accessToken: data.access_token, email };
-    }
+<script>
+'use strict';
 
-// All bookings currently loaded from Supabase, kept so the status filter can re-render
-    // without an extra network request.
-    let loadedBookings = [];
-    let activeStatusFilter = 'all';
+const ORDERS_KEY = 'excelBakeryOrders';
+let activeFilter = 'all';
 
-    // Renders the bookings array into the admin table, or shows the empty state.
-    function renderBookingsTable(bookings) {
-      const tbody = document.getElementById('bookingsTableBody');
-      const emptyState = document.getElementById('bookingsAdminEmpty');
-      const table = document.getElementById('bookingsTable');
-      tbody.innerHTML = '';
+function loadOrders() {
+  try {
+    return JSON.parse(localStorage.getItem(ORDERS_KEY)) || [];
+  } catch (e) {
+    return [];
+  }
+}
 
-      const filtered = activeStatusFilter === 'all'
-        ? bookings
-        : bookings.filter((b) => (b.status || 'pending') === activeStatusFilter);
+function saveOrders(orders) {
+  localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+}
 
-      if (!filtered.length) {
-        table.classList.add('hidden');
-        emptyState.classList.remove('hidden');
-        return;
-      }
+function formatPlacedAt(iso) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleString('en-US', {
+    year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit',
+  });
+}
 
-      table.classList.remove('hidden');
-      emptyState.classList.add('hidden');
+function renderSummary(orders) {
+  const nonCancelled = orders.filter((o) => (o.status || 'new') !== 'cancelled');
+  const revenue = nonCancelled.reduce((sum, o) => sum + (o.total || 0), 0);
 
-      filtered.forEach((b) => {
-        const status = b.status || 'pending';
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td><span class="status-badge status-${status}">${status}</span></td>
-          <td>${b.reference || '—'}</td>
-          <td>${b.full_name || '—'}</td>
-          <td>${b.phone || '—'}</td>
-          <td>${b.email || '—'}</td>
-          <td>${b.booking_date || '—'}</td>
-          <td>${(b.services || '—').split(';').join('<br />')}</td>
-          <td>$${b.total_price ?? '—'}</td>
-          <td>${b.notes || '—'}</td>
-          <td>${formatSubmittedAt(b.created_at)}</td>
-          <td>${status === 'pending'
-            ? `<button type="button" class="btn btn-secondary confirm-btn" data-ref="${b.reference}">Confirm</button>`
-            : '—'}</td>
-        `;
-        tbody.appendChild(row);
-      });
-    }
+  document.getElementById('stat-total').textContent = orders.length;
+  document.getElementById('stat-new').textContent = orders.filter((o) => (o.status || 'new') === 'new').length;
+  document.getElementById('stat-revenue').textContent = `$${revenue.toFixed(2)}`;
+}
 
-    // Fetches bookings from Supabase's REST API using the logged-in admin's access token.
-    // Row Level Security on the `bookings` table only allows authenticated reads (see README),
-    // so this request is rejected unless accessToken belongs to a real logged-in admin.
-    async function loadBookings() {
-      const status = document.getElementById('adminStatus');
-      const session = loadSession();
-      if (!session) return;
+function renderOrders() {
+  const orders = loadOrders();
+  renderSummary(orders);
 
-      status.textContent = 'Loading bookings…';
-      try {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/bookings?select=*&order=created_at.desc`, {
-          headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${session.accessToken}` },
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message || 'Failed to load bookings.');
-        loadedBookings = data;
-        renderBookingsTable(loadedBookings);
-        status.textContent = `${data.length} booking(s) loaded.`;
-      } catch (err) {
-        status.textContent = `Error: ${err.message}`;
-      }
-    }
+  const filtered = activeFilter === 'all'
+    ? orders
+    : orders.filter((o) => (o.status || 'new') === activeFilter);
 
-    // Marks a pending booking as confirmed once the admin has verified availability/staffing.
-    async function confirmBooking(reference) {
-      const status = document.getElementById('adminStatus');
-      const session = loadSession();
-      if (!session) return;
+  const tbody = document.getElementById('orders-table-body');
+  const wrap = document.getElementById('orders-table-wrap');
+  const empty = document.getElementById('orders-empty');
 
-      status.textContent = `Confirming ${reference}…`;
-      try {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/bookings?reference=eq.${encodeURIComponent(reference)}`, {
-          method: 'PATCH',
-          headers: {
-            apikey: SUPABASE_ANON_KEY,
-            Authorization: `Bearer ${session.accessToken}`,
-            'Content-Type': 'application/json',
-            Prefer: 'return=minimal',
-          },
-          body: JSON.stringify({ status: 'confirmed' }),
-        });
-        if (!res.ok) {
-          const data = await res.json().catch(() => ({}));
-          throw new Error(data.message || 'Failed to confirm booking.');
-        }
-        await loadBookings();
-      } catch (err) {
-        status.textContent = `Error: ${err.message}`;
-      }
-    }
+  if (!filtered.length) {
+    wrap.style.display = 'none';
+    empty.style.display = 'block';
+    empty.textContent = orders.length
+      ? 'No orders match this filter.'
+      : 'No orders have been placed on this browser yet.';
+    return;
+  }
 
-    // Switches the visible view based on whether an admin is currently logged in.
-    function showLoggedIn(isLoggedIn) {
-      document.getElementById('loggedOutView').classList.toggle('hidden', isLoggedIn);
-      document.getElementById('loggedInView').classList.toggle('hidden', !isLoggedIn);
-    }
+  wrap.style.display = 'block';
+  empty.style.display = 'none';
 
-    document.addEventListener('DOMContentLoaded', () => {
-      if (SUPABASE_URL.includes('YOUR_SUPABASE') || SUPABASE_ANON_KEY.includes('YOUR_SUPABASE')) {
-        document.getElementById('loginStatus').textContent =
-          'Supabase is not configured yet — add SUPABASE_URL and SUPABASE_ANON_KEY in admin.html and js/script.js.';
-      }
+  tbody.innerHTML = filtered.map((order) => {
+    const status = order.status || 'new';
+    const itemsList = (order.items || [])
+      .map((item) => `<li>${item.qty} × ${item.name}</li>`)
+      .join('');
 
-      document.getElementById('loginForm').addEventListener('submit', async (event) => {
-        event.preventDefault();
-        const status = document.getElementById('loginStatus');
-        const email = document.getElementById('loginEmail').value.trim();
-        const password = document.getElementById('loginPassword').value;
-        status.textContent = 'Logging in…';
-        try {
-          const session = await login(email, password);
-          saveSession(session);
-          status.textContent = '';
-          showLoggedIn(true);
-          loadBookings();
-        } catch (err) {
-          status.textContent = err.message;
-        }
-      });
+    return `
+      <tr data-ref="${order.ref}">
+        <td><span class="status-pill ${status}">${status}</span></td>
+        <td>${order.ref}</td>
+        <td>
+          <strong>${order.name || '—'}</strong><br>
+          ${order.phone || '—'}<br>
+          <span style="color:var(--ink-muted);">${order.address || '—'}</span>
+        </td>
+        <td><ul class="order-items-list">${itemsList}</ul></td>
+        <td>$${(order.total || 0).toFixed(2)}</td>
+        <td>${formatPlacedAt(order.placedAt)}</td>
+        <td>
+          <div class="row-actions">
+            ${status !== 'fulfilled' ? `<button type="button" class="btn-fulfill" data-action="fulfill">Mark Fulfilled</button>` : ''}
+            ${status !== 'cancelled' ? `<button type="button" class="btn-cancel" data-action="cancel">Cancel</button>` : ''}
+            <button type="button" class="btn-delete" data-action="delete">Delete</button>
+          </div>
+        </td>
+      </tr>`;
+  }).join('');
+}
 
-      document.getElementById('logoutBtn').addEventListener('click', () => {
-        clearSession();
-        showLoggedIn(false);
-      });
+function updateOrderStatus(ref, status) {
+  const orders = loadOrders();
+  const order = orders.find((o) => o.ref === ref);
+  if (!order) return;
+  order.status = status;
+  saveOrders(orders);
+  renderOrders();
+}
 
-      document.getElementById('refreshBtn').addEventListener('click', loadBookings);
+function deleteOrder(ref) {
+  const orders = loadOrders().filter((o) => o.ref !== ref);
+  saveOrders(orders);
+  renderOrders();
+}
 
-      document.getElementById('statusFilterBar').addEventListener('click', (event) => {
-        const btn = event.target.closest('.filter-btn');
-        if (!btn) return;
-        document.querySelectorAll('#statusFilterBar .filter-btn').forEach((b) => b.classList.remove('active'));
-        btn.classList.add('active');
-        activeStatusFilter = btn.dataset.status;
-        renderBookingsTable(loadedBookings);
-      });
+document.getElementById('filter-chips').addEventListener('click', (event) => {
+  const btn = event.target.closest('.filter-chip');
+  if (!btn) return;
+  document.querySelectorAll('.filter-chip').forEach((b) => b.classList.remove('active'));
+  btn.classList.add('active');
+  activeFilter = btn.dataset.status;
+  renderOrders();
+});
 
-      document.getElementById('bookingsTableBody').addEventListener('click', (event) => {
-        const btn = event.target.closest('.confirm-btn');
-        if (!btn) return;
-        confirmBooking(btn.dataset.ref);
-      });
+document.getElementById('orders-table-body').addEventListener('click', (event) => {
+  const btn = event.target.closest('button[data-action]');
+  if (!btn) return;
+  const ref = btn.closest('tr').dataset.ref;
+  const action = btn.dataset.action;
 
-      const existingSession = loadSession();
-      showLoggedIn(!!existingSession);
-      if (existingSession) loadBookings();
-    });
-  </script>
+  if (action === 'fulfill') updateOrderStatus(ref, 'fulfilled');
+  if (action === 'cancel') updateOrderStatus(ref, 'cancelled');
+  if (action === 'delete') {
+    if (confirm(`Delete order ${ref}? This cannot be undone.`)) deleteOrder(ref);
+  }
+});
+
+document.getElementById('refresh-btn').addEventListener('click', renderOrders);
+
+document.getElementById('clear-btn').addEventListener('click', () => {
+  if (!confirm('Clear all orders on this browser? This cannot be undone.')) return;
+  saveOrders([]);
+  renderOrders();
+});
+
+renderOrders();
+</script>
 </body>
 </html>
