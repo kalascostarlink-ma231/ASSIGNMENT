@@ -311,6 +311,13 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 
 .cake-card .cake-thumb {
   aspect-ratio: 4 / 3;
+  position: relative;
+  overflow: hidden;
+}
+
+.cake-card .cake-thumb .cake-fallback {
+  position: absolute;
+  inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -318,6 +325,14 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 }
 
 .cake-card .cake-thumb svg { width: 78%; height: 78%; }
+
+.cake-card .cake-thumb .cake-photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 
 .cake-card-body { padding: 20px 22px 24px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
 
@@ -519,9 +534,22 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   width: 60px; height: 60px;
   border-radius: 10px;
   flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+}
+.cart-item .thumb .cake-fallback {
+  position: absolute;
+  inset: 0;
   display: flex; align-items: center; justify-content: center;
 }
 .cart-item .thumb svg { width: 85%; height: 85%; }
+.cart-item .thumb .cake-photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 
 .cart-item .info { flex: 1; min-width: 0; }
 .cart-item .info h4 { margin: 0 0 4px; font-size: 15px; font-family: var(--font-display); }

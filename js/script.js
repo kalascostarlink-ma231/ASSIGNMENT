@@ -10,13 +10,16 @@
 const SUPABASE_URL = 'https://btbykqususlhajdahrpg.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_pgAOYkhhIOALErwSJg1Hzw_p_-s2gHl';
 
+// `photo` points at a real product photo. If the file isn't there yet (or fails to load),
+// the catalog and cart both fall back to the tinted SVG illustration automatically — see
+// cakeThumbMarkup() below. Drop real photos into images/cakes/ using these exact filenames.
 const CAKES = [
-  { id: 'vanilla', name: 'Classic Vanilla', desc: 'Vanilla sponge, silky buttercream', price: 25, tint: 'vanilla' },
-  { id: 'chocolate', name: 'Chocolate Fudge', desc: 'Rich cocoa layers, ganache drip', price: 30, tint: 'chocolate' },
-  { id: 'redvelvet', name: 'Red Velvet', desc: 'Cream cheese frosting', price: 28, tint: 'redvelvet' },
-  { id: 'strawberry', name: 'Strawberry Delight', desc: 'Fresh strawberry layers', price: 32, tint: 'strawberry' },
-  { id: 'lemon', name: 'Lemon Zest', desc: 'Citrus glaze, light crumb', price: 27, tint: 'lemon' },
-  { id: 'caramel', name: 'Caramel Macchiato', desc: 'Coffee sponge, caramel drizzle', price: 34, tint: 'caramel' },
+  { id: 'vanilla', name: 'Classic Vanilla', desc: 'Vanilla sponge, silky buttercream', price: 25, tint: 'vanilla', photo: 'images/cakes/vanilla.jpg' },
+  { id: 'chocolate', name: 'Chocolate Fudge', desc: 'Rich cocoa layers, ganache drip', price: 30, tint: 'chocolate', photo: 'images/cakes/chocolate.jpg' },
+  { id: 'redvelvet', name: 'Red Velvet', desc: 'Cream cheese frosting', price: 28, tint: 'redvelvet', photo: 'images/cakes/redvelvet.jpg' },
+  { id: 'strawberry', name: 'Strawberry Delight', desc: 'Fresh strawberry layers', price: 32, tint: 'strawberry', photo: 'images/cakes/strawberry.jpg' },
+  { id: 'lemon', name: 'Lemon Zest', desc: 'Citrus glaze, light crumb', price: 27, tint: 'lemon', photo: 'images/cakes/lemon.jpg' },
+  { id: 'caramel', name: 'Caramel Macchiato', desc: 'Coffee sponge, caramel drizzle', price: 34, tint: 'caramel', photo: 'images/cakes/caramel.jpg' },
 ];
 
 const DELIVERY_FEE = 5;
@@ -71,7 +74,7 @@ function renderCartItems() {
       const cake = cakeById(id);
       return `
         <div class="cart-item" data-id="${id}">
-          <div class="thumb tint-${cake.tint}">${cakeSVG()}</div>
+          <div class="thumb tint-${cake.tint}">${cakeThumbMarkup(cake)}</div>
           <div class="info">
             <h4>${cake.name}</h4>
             <div class="item-price">$${(cake.price * qty).toFixed(2)}</div>
@@ -99,7 +102,9 @@ function renderCartItems() {
   updateCartBadge();
 }
 
-// ---------- Cake catalog SVG (shared illustration, tinted per flavor via CSS) ----------
+// ---------- Cake catalog artwork ----------
+// Shared tinted SVG illustration, used as the fallback when a cake has no real
+// photo yet (or the photo file fails to load).
 
 function cakeSVG() {
   return `
@@ -115,11 +120,21 @@ function cakeSVG() {
   </svg>`;
 }
 
+// Renders the SVG fallback first, then a real photo stacked on top of it; if the photo
+// 404s or hasn't been uploaded yet, onerror removes the <img> so the fallback shows through.
+function cakeThumbMarkup(cake) {
+  return `
+    <div class="cake-fallback">${cakeSVG()}</div>
+    <img src="${cake.photo}" alt="${cake.name}" class="cake-photo" loading="lazy"
+         onerror="this.remove();">
+  `;
+}
+
 function renderCatalog() {
   const grid = document.getElementById('cake-grid');
   grid.innerHTML = CAKES.map((cake) => `
     <article class="cake-card">
-      <div class="cake-thumb tint-${cake.tint}">${cakeSVG()}</div>
+      <div class="cake-thumb tint-${cake.tint}">${cakeThumbMarkup(cake)}</div>
       <div class="cake-card-body">
         <h3>${cake.name}</h3>
         <p class="desc">${cake.desc}</p>
