@@ -1,6 +1,6 @@
 # Excel Bakery
 
-A fully responsive, interactive cake-ordering website for **Excel Bakery**. Built with plain HTML, CSS and vanilla JavaScript — no frameworks, no build tools, no backend.
+A fully responsive, interactive cake-ordering website for **Excel Bakery**. Built with plain HTML, CSS and vanilla JavaScript — no frameworks, no build tools — backed by a Supabase database for orders.
 
 ## Features
 
@@ -12,7 +12,7 @@ A fully responsive, interactive cake-ordering website for **Excel Bakery**. Buil
   2. **Checkout** — delivery details form (name, phone, address, notes).
   3. **Confirmation** — a generated order reference (e.g. `EB-482913`) and a link to track the order later.
 - **Cart persistence** — the cart survives a page refresh via `localStorage`.
-- **Order history** — every placed order is saved to `localStorage` (`excelBakeryOrders`), which powers the admin and order-tracking pages below.
+- **Order submission** — placing an order saves it to a Supabase `orders` table, so it's visible from any device, not just the one that placed it. This powers the admin and order-tracking pages below.
 - **"How It Works"** three-step explainer section.
 - Fully responsive layout (mobile-first) with breakpoints at 560px and 960px.
 
@@ -36,7 +36,7 @@ EXCEL BOOKING PLATFORM/
 - CSS3 (custom properties/theming, Flexbox, Grid, media queries)
 - Vanilla JavaScript (ES6+: `const`/`let`, arrow functions, template literals)
 
-No package manager, build step, or JS libraries anywhere in this project.
+No package manager, build step, or JS libraries anywhere in this project — `admin.html` and `check-booking.html` talk to Supabase using plain `fetch()` calls rather than an SDK.
 
 ## Running Locally
 
@@ -49,23 +49,94 @@ That's it — there is no server or install step required.
 
 Any static host works since this is plain HTML/CSS/JS — just point it at the repo root (Vercel, Netlify, GitHub Pages, etc.). Leave build settings empty (static site, no framework).
 
-## Orders: Current State (No Backend)
+## Admin: Viewing Orders
 
-There is currently no backend or database wired up. Every order placed on `index.html` is written to that browser's `localStorage` under the key `excelBakeryOrders`. This means:
+Orders are saved to a **Supabase** project (a free hosted Postgres database with built-in authentication) and viewed on `/admin.html`, linked from the site footer. It's safe to leave that link public — the page is useless without a real Supabase admin login, and the database itself rejects unauthenticated reads (see Row Level Security below), not just the page's JavaScript.
 
-- **`admin.html`** (linked from `index.html`'s footer as "Admin") reads that same `localStorage` key and shows a dashboard with summary stats, status filters (New / Fulfilled / Cancelled), and actions to mark an order fulfilled, cancel it, or delete it.
-- **`check-booking.html`** ("Track My Order", linked from the footer and from the order-confirmation screen) lets a customer look up their own order later using their **order reference + phone number**, and print an invoice.
-- Because everything lives in `localStorage`, **orders are only visible on the same device/browser that placed them** — an order placed on a customer's phone won't show up in `admin.html` opened on your laptop. This is a real limitation, not a bug.
+### One-time Supabase setup (I can't do this part for you — it's tied to your account)
 
-### Wiring up a real backend
+This reuses the same Supabase project that was already set up for this site (`SUPABASE_URL`/`SUPABASE_ANON_KEY` are already wired into `js/script.js`, `admin.html` and `check-booking.html`) — you just need to add the `orders` table and, if you haven't already, an admin login.
 
-To make orders visible across devices (e.g. a customer orders from their phone, you see it on your laptop), replace the `localStorage` calls with a real API:
+1. Open your project's SQL Editor at [supabase.com](https://supabase.com) and run:
+   ```sql
+   create table orders (
+     id bigint generated always as identity primary key,
+     ref text not null unique,
+     name text not null,
+     phone text not null,
+     address text not null,
+     notes text,
+     items jsonb not null,
+     subtotal numeric not null,
+     delivery_fee numeric not null,
+     total numeric not null,
+     status text not null default 'new',
+     placed_at timestamptz not null default now()
+   );
 
-1. Pick a backend (Supabase, Firebase, or a custom API) with a table/collection for orders (`ref`, `name`, `phone`, `address`, `notes`, `items`, `subtotal`, `deliveryFee`, `total`, `status`, `placedAt`).
-2. In `js/script.js`, replace the `TODO` inside the checkout form's `submit` handler with a `fetch('/api/orders', { method: 'POST', body: JSON.stringify(order) })` call (or your backend's SDK).
-3. In `admin.html`, replace `loadOrders()`/`saveOrders()` (currently reading/writing `localStorage`) with API calls to list and update orders.
-4. In `check-booking.html`, replace `findOrder()` with a server-side lookup endpoint that matches on reference + phone (so customers can't browse each other's orders).
-5. Add real authentication to `admin.html` if the orders endpoint contains customer PII and shouldn't be publicly readable.
+   alter table orders enable row level security;
+
+   -- Anyone (including customers who aren't logged in) can submit an order...
+   create policy "Anyone can insert orders"
+     on orders for insert
+     to anon
+     with check (true);
+
+   -- ...but only a logged-in admin can read, update, or delete them.
+   create policy "Authenticated users can view orders"
+     on orders for select
+     to authenticated
+     using (true);
+
+   create policy "Authenticated users can update orders"
+     on orders for update
+     to authenticated
+     using (true)
+     with check (true);
+
+   create policy "Authenticated users can delete orders"
+     on orders for delete
+     to authenticated
+     using (true);
+   ```
+2. **Add a secure customer lookup** — still in the SQL Editor:
+   ```sql
+   create or replace function get_order_status(p_ref text, p_phone text)
+   returns table (
+     ref text,
+     status text,
+     name text,
+     address text,
+     items jsonb,
+     subtotal numeric,
+     delivery_fee numeric,
+     total numeric,
+     placed_at timestamptz
+   )
+   language sql
+   security definer
+   set search_path = public
+   as $$
+     select ref, status, name, address, items, subtotal, delivery_fee, total, placed_at
+     from orders
+     where ref = p_ref
+       and regexp_replace(phone, '\D', '', 'g') = regexp_replace(p_phone, '\D', '', 'g');
+   $$;
+
+   grant execute on function get_order_status(text, text) to anon;
+   ```
+3. **Create your admin login** (skip if you already have one from before): Authentication → Users → **Add user** → enter your email + a strong password. Do this instead of letting people self-register, so only people you add can log in.
+4. Visit `/admin.html` and log in with that email/password. There is no separate "admin credential" beyond this login — Supabase Auth *is* the credential.
+
+The anon/publishable key is meant to be public — it's not a secret, since Supabase enforces who can read/write via the Row Level Security policies from step 1, not by hiding the key.
+
+**Note on the newer key format:** Supabase's docs recommend sending the publishable/secret key only on the `apikey` header, not also as `Authorization: Bearer <key>` — some setups will try to parse it as a JWT and reject it. Separately, if you ever test inserts directly with `curl`, use `Prefer: return=minimal` (which the app's own code already does) rather than `return=representation` — asking Postgres to hand back the inserted row applies the table's SELECT policy too, so it fails for a role (like `anon`) that can insert but isn't allowed to read the table back.
+
+### How it fits together
+
+- **`index.html`** posts every placed order straight to the `orders` table (see `submitOrderToSupabase()` in `js/script.js`). If the request fails (e.g. offline, or the table above hasn't been created yet), checkout shows an inline error instead of a false confirmation.
+- **`/admin.html`** shows a status badge per row, filter chips (All / New / Fulfilled / Cancelled), and Mark Fulfilled / Cancel / Delete actions — all backed by real `PATCH`/`DELETE` requests against Supabase.
+- **`/check-booking.html`** ("Track My Order") lets a customer look up their own order later using their **order reference + phone number**, and print an invoice. The lookup runs through the `get_order_status` function rather than a direct table read, so it only ever returns a row when both match — nobody can browse anyone else's orders this way.
 
 ## Notes
 

@@ -89,19 +89,9 @@
 <script>
 'use strict';
 
-const ORDERS_KEY = 'excelBakeryOrders';
-
-function loadOrders() {
-  try {
-    return JSON.parse(localStorage.getItem(ORDERS_KEY)) || [];
-  } catch (e) {
-    return [];
-  }
-}
-
-function normalizePhone(value) {
-  return (value || '').replace(/\D/g, '');
-}
+// Same project config as js/script.js.
+const SUPABASE_URL = 'https://btbykqususlhajdahrpg.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_pgAOYkhhIOALErwSJg1Hzw_p_-s2gHl';
 
 function formatPlacedAt(iso) {
   if (!iso) return '—';
@@ -110,13 +100,17 @@ function formatPlacedAt(iso) {
   });
 }
 
-function findOrder(ref, phone) {
-  const orders = loadOrders();
-  const normalizedPhone = normalizePhone(phone);
-  return orders.find((o) =>
-    o.ref.trim().toLowerCase() === ref.trim().toLowerCase() &&
-    normalizePhone(o.phone) === normalizedPhone
-  );
+// Looks up a single order via a security-definer RPC — this only ever returns a row when
+// both the reference AND the phone number match, so no one can browse other customers' data.
+async function lookupOrder(ref, phone) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_order_status`, {
+    method: 'POST',
+    headers: { apikey: SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ p_ref: ref, p_phone: phone }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || 'Lookup failed. Please try again.');
+  return data[0] || null;
 }
 
 function renderInvoice(order) {
@@ -126,20 +120,20 @@ function renderInvoice(order) {
   document.getElementById('inv-ref').textContent = order.ref;
   document.getElementById('inv-name').textContent = order.name || '—';
   document.getElementById('inv-address').textContent = order.address || '—';
-  document.getElementById('inv-placed').textContent = formatPlacedAt(order.placedAt);
+  document.getElementById('inv-placed').textContent = formatPlacedAt(order.placed_at);
 
   document.getElementById('inv-items').innerHTML = (order.items || [])
     .map((item) => `<li>${item.qty} × ${item.name} — $${(item.price * item.qty).toFixed(2)}</li>`)
     .join('');
 
-  document.getElementById('inv-subtotal').textContent = `$${(order.subtotal || 0).toFixed(2)}`;
-  document.getElementById('inv-delivery').textContent = `$${(order.deliveryFee || 0).toFixed(2)}`;
-  document.getElementById('inv-total').textContent = `$${(order.total || 0).toFixed(2)}`;
+  document.getElementById('inv-subtotal').textContent = `$${Number(order.subtotal || 0).toFixed(2)}`;
+  document.getElementById('inv-delivery').textContent = `$${Number(order.delivery_fee || 0).toFixed(2)}`;
+  document.getElementById('inv-total').textContent = `$${Number(order.total || 0).toFixed(2)}`;
 
   document.getElementById('invoice-card').classList.remove('hidden');
 }
 
-document.getElementById('lookup-form').addEventListener('submit', (event) => {
+document.getElementById('lookup-form').addEventListener('submit', async (event) => {
   event.preventDefault();
   const status = document.getElementById('lookup-status');
   const ref = document.getElementById('lookup-ref').value.trim();
@@ -152,14 +146,18 @@ document.getElementById('lookup-form').addEventListener('submit', (event) => {
     return;
   }
 
-  const order = findOrder(ref, phone);
-  if (!order) {
-    status.textContent = 'No order found with that reference and phone number on this browser. Please double-check both, or note that order lookup only works on the device the order was placed from.';
-    return;
+  status.textContent = 'Looking up your order…';
+  try {
+    const order = await lookupOrder(ref, phone);
+    if (!order) {
+      status.textContent = 'No order found with that reference and phone number. Please double-check both.';
+      return;
+    }
+    status.textContent = '';
+    renderInvoice(order);
+  } catch (err) {
+    status.textContent = err.message;
   }
-
-  status.textContent = '';
-  renderInvoice(order);
 });
 
 document.getElementById('print-invoice-btn').addEventListener('click', () => window.print());

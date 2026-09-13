@@ -1,10 +1,14 @@
 // ============================================
 // Excel Bakery — cart & checkout logic
-// Cart persists in localStorage so it survives a refresh.
-// No backend is wired up yet — "Place Order" writes the
-// order to localStorage and shows a confirmation screen.
-// Swap the placeOrder() body for a real API call later.
+// The cart itself persists in localStorage so it survives a refresh.
+// Orders are submitted to Supabase (see README) so they're visible
+// from any device on /admin.html, not just the browser that placed them.
 // ============================================
+
+// The anon/publishable key is meant to be public — Supabase enforces access with
+// Row Level Security policies on the `orders` table (see README), not by hiding this key.
+const SUPABASE_URL = 'https://btbykqususlhajdahrpg.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_pgAOYkhhIOALErwSJg1Hzw_p_-s2gHl';
 
 const CAKES = [
   { id: 'vanilla', name: 'Classic Vanilla', desc: 'Vanilla sponge, silky buttercream', price: 25, tint: 'vanilla' },
@@ -197,8 +201,41 @@ document.getElementById('back-to-cart').addEventListener('click', () => showStep
 
 // ---------- Order submission ----------
 
-document.getElementById('checkout-form').addEventListener('submit', (e) => {
+// Saves the order to Supabase so it shows up on /admin.html regardless of which
+// device the customer ordered from. Throws on failure so the caller can show an error.
+async function submitOrderToSupabase(order) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/orders`, {
+    method: 'POST',
+    headers: {
+      apikey: SUPABASE_ANON_KEY,
+      'Content-Type': 'application/json',
+      Prefer: 'return=minimal',
+    },
+    body: JSON.stringify({
+      ref: order.ref,
+      name: order.name,
+      phone: order.phone,
+      address: order.address,
+      notes: order.notes,
+      items: order.items,
+      subtotal: order.subtotal,
+      delivery_fee: order.deliveryFee,
+      total: order.total,
+      status: 'new',
+    }),
+  });
+
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.message || 'Failed to place order.');
+  }
+}
+
+document.getElementById('checkout-form').addEventListener('submit', async (e) => {
   e.preventDefault();
+
+  const statusEl = document.getElementById('checkout-status');
+  const submitBtn = document.getElementById('checkout-submit-btn');
 
   const order = {
     ref: 'EB-' + Math.floor(100000 + Math.random() * 900000),
@@ -206,19 +243,28 @@ document.getElementById('checkout-form').addEventListener('submit', (e) => {
     phone: document.getElementById('cust-phone').value.trim(),
     address: document.getElementById('cust-address').value.trim(),
     notes: document.getElementById('cust-notes').value.trim(),
-    items: Object.entries(cart).map(([id, qty]) => ({ id, qty, ...cakeById(id) })),
+    items: Object.entries(cart).map(([id, qty]) => {
+      const cake = cakeById(id);
+      return { id, qty, name: cake.name, price: cake.price };
+    }),
     subtotal: cartSubtotal(),
     deliveryFee: DELIVERY_FEE,
     total: cartSubtotal() + DELIVERY_FEE,
-    placedAt: new Date().toISOString(),
   };
 
-  // TODO: replace with a real API call, e.g.
-  // fetch('/api/orders', { method: 'POST', body: JSON.stringify(order) })
-  const orders = JSON.parse(localStorage.getItem('excelBakeryOrders') || '[]');
-  orders.push(order);
-  localStorage.setItem('excelBakeryOrders', JSON.stringify(orders));
+  submitBtn.disabled = true;
+  statusEl.textContent = 'Placing your order…';
 
+  try {
+    await submitOrderToSupabase(order);
+  } catch (err) {
+    statusEl.textContent = 'Could not place your order — please check your connection and try again.';
+    submitBtn.disabled = false;
+    return;
+  }
+
+  statusEl.textContent = '';
+  submitBtn.disabled = false;
   document.getElementById('order-ref').textContent = order.ref;
 
   cart = {};
