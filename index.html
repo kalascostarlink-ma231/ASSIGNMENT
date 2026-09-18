@@ -88,7 +88,41 @@
         <p>Pick a flavor, choose your size on the next screen, and place your order in minutes.</p>
       </div>
     </div>
-    <div class="cake-grid" id="cake-grid"><!-- filled by script.js --></div>
+
+    <div class="express-bar" role="group" aria-label="Quick filters">
+      <button type="button" class="express-chip active" data-filter="all">All Cakes</button>
+      <button type="button" class="express-chip" data-filter="express">⚡ Same-Day Delivery</button>
+      <button type="button" class="express-chip" data-filter="bestseller">🏆 Best Sellers</button>
+      <button type="button" class="express-chip" data-filter="trending">🔥 Trending</button>
+      <button type="button" class="express-chip" data-filter="under30">💰 Under $30</button>
+    </div>
+
+    <div class="catalog-layout">
+      <aside class="catalog-sidebar" aria-label="Filter by price">
+        <h4>Filter by Price</h4>
+        <label class="price-filter-option"><input type="checkbox" class="price-filter" value="under28"> Under $28</label>
+        <label class="price-filter-option"><input type="checkbox" class="price-filter" value="28-31"> $28 – $31</label>
+        <label class="price-filter-option"><input type="checkbox" class="price-filter" value="31-34"> $31 – $34</label>
+        <label class="price-filter-option"><input type="checkbox" class="price-filter" value="over34"> Over $34</label>
+      </aside>
+
+      <div class="catalog-main">
+        <div class="catalog-toolbar">
+          <span id="result-count"></span>
+          <label class="sort-control">Sort by
+            <select id="sort-select">
+              <option value="popularity">Popularity</option>
+              <option value="price-asc">Price: Low to High</option>
+              <option value="price-desc">Price: High to Low</option>
+              <option value="bestseller">Best Seller</option>
+              <option value="trending">Trending</option>
+            </select>
+          </label>
+        </div>
+        <div class="cake-grid" id="cake-grid"><!-- filled by script.js --></div>
+        <p id="no-results" hidden>No cakes match these filters.</p>
+      </div>
+    </div>
   </div>
 </section>
 

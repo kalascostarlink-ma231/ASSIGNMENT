@@ -13,13 +13,15 @@ const SUPABASE_ANON_KEY = 'sb_publishable_pgAOYkhhIOALErwSJg1Hzw_p_-s2gHl';
 // `photo` points at a real product photo. If the file isn't there yet (or fails to load),
 // the catalog and cart both fall back to the tinted SVG illustration automatically — see
 // cakeThumbMarkup() below. Drop real photos into images/cakes/ using these exact filenames.
+// rating/reviews/popularity/bestSeller/trending/express are merchandising data —
+// there's no review system yet, so these are seeded here until a real one exists.
 const CAKES = [
-  { id: 'vanilla', name: 'Classic Vanilla', desc: 'Vanilla sponge, silky buttercream', price: 25, tint: 'vanilla', photo: 'images/cakes/vanilla.jpg' },
-  { id: 'chocolate', name: 'Chocolate Fudge', desc: 'Rich cocoa layers, ganache drip', price: 30, tint: 'chocolate', photo: 'images/cakes/chocolate.jpg' },
-  { id: 'redvelvet', name: 'Red Velvet', desc: 'Cream cheese frosting', price: 28, tint: 'redvelvet', photo: 'images/cakes/redvelvet.jpg' },
-  { id: 'strawberry', name: 'Strawberry Delight', desc: 'Fresh strawberry layers', price: 32, tint: 'strawberry', photo: 'images/cakes/strawberry.jpg' },
-  { id: 'lemon', name: 'Lemon Zest', desc: 'Citrus glaze, light crumb', price: 27, tint: 'lemon', photo: 'images/cakes/lemon.jpg' },
-  { id: 'caramel', name: 'Caramel Macchiato', desc: 'Coffee sponge, caramel drizzle', price: 34, tint: 'caramel', photo: 'images/cakes/caramel.jpg' },
+  { id: 'vanilla', name: 'Classic Vanilla', desc: 'Vanilla sponge, silky buttercream', price: 25, originalPrice: 29, tint: 'vanilla', photo: 'images/cakes/vanilla.jpg', rating: 4.6, reviews: 128, popularity: 90, bestSeller: true, trending: false, express: true },
+  { id: 'chocolate', name: 'Chocolate Fudge', desc: 'Rich cocoa layers, ganache drip', price: 30, originalPrice: 36, tint: 'chocolate', photo: 'images/cakes/chocolate.jpg', rating: 4.8, reviews: 214, popularity: 98, bestSeller: true, trending: true, express: true },
+  { id: 'redvelvet', name: 'Red Velvet', desc: 'Cream cheese frosting', price: 28, originalPrice: 28, tint: 'redvelvet', photo: 'images/cakes/redvelvet.jpg', rating: 4.7, reviews: 176, popularity: 85, bestSeller: true, trending: false, express: false },
+  { id: 'strawberry', name: 'Strawberry Delight', desc: 'Fresh strawberry layers', price: 32, originalPrice: 38, tint: 'strawberry', photo: 'images/cakes/strawberry.jpg', rating: 4.5, reviews: 94, popularity: 70, bestSeller: false, trending: true, express: true },
+  { id: 'lemon', name: 'Lemon Zest', desc: 'Citrus glaze, light crumb', price: 27, originalPrice: 27, tint: 'lemon', photo: 'images/cakes/lemon.jpg', rating: 4.4, reviews: 61, popularity: 55, bestSeller: false, trending: false, express: false },
+  { id: 'caramel', name: 'Caramel Macchiato', desc: 'Coffee sponge, caramel drizzle', price: 34, originalPrice: 40, tint: 'caramel', photo: 'images/cakes/caramel.jpg', rating: 4.9, reviews: 152, popularity: 88, bestSeller: false, trending: true, express: true },
 ];
 
 const DELIVERY_FEE = 5;
@@ -130,21 +132,85 @@ function cakeThumbMarkup(cake) {
   `;
 }
 
+// ---------- Catalog filters & sort ----------
+
+const PRICE_BUCKETS = {
+  under28: (c) => c.price < 28,
+  '28-31': (c) => c.price >= 28 && c.price <= 31,
+  '31-34': (c) => c.price > 31 && c.price <= 34,
+  over34: (c) => c.price > 34,
+};
+
+const EXPRESS_FILTERS = {
+  all: () => true,
+  express: (c) => c.express,
+  bestseller: (c) => c.bestSeller,
+  trending: (c) => c.trending,
+  under30: (c) => c.price < 30,
+};
+
+const SORTERS = {
+  popularity: (a, b) => b.popularity - a.popularity,
+  'price-asc': (a, b) => a.price - b.price,
+  'price-desc': (a, b) => b.price - a.price,
+  bestseller: (a, b) => (b.bestSeller - a.bestSeller) || (b.popularity - a.popularity),
+  trending: (a, b) => (b.trending - a.trending) || (b.popularity - a.popularity),
+};
+
+let activeExpressFilter = 'all';
+let activePriceBuckets = [];
+let activeSort = 'popularity';
+
+function getVisibleCakes() {
+  return CAKES
+    .filter(EXPRESS_FILTERS[activeExpressFilter])
+    .filter((c) => activePriceBuckets.length === 0 || activePriceBuckets.some((b) => PRICE_BUCKETS[b](c)))
+    .sort(SORTERS[activeSort]);
+}
+
+function starRatingMarkup(rating) {
+  const fill = Math.max(0, Math.min(100, (rating / 5) * 100));
+  return `<span class="stars" style="--fill:${fill}%" aria-hidden="true"></span>`;
+}
+
 function renderCatalog() {
   const grid = document.getElementById('cake-grid');
-  grid.innerHTML = CAKES.map((cake) => `
+  const cakes = getVisibleCakes();
+  const countEl = document.getElementById('result-count');
+  const emptyEl = document.getElementById('no-results');
+
+  if (countEl) countEl.textContent = `${cakes.length} cake${cakes.length === 1 ? '' : 's'}`;
+  if (emptyEl) emptyEl.hidden = cakes.length !== 0;
+
+  grid.innerHTML = cakes.map((cake) => {
+    const discountPct = cake.originalPrice > cake.price
+      ? Math.round((1 - cake.price / cake.originalPrice) * 100)
+      : 0;
+    return `
     <article class="cake-card">
-      <div class="cake-thumb tint-${cake.tint}">${cakeThumbMarkup(cake)}</div>
+      <div class="cake-thumb tint-${cake.tint}">
+        ${cakeThumbMarkup(cake)}
+        ${discountPct > 0 ? `<span class="discount-badge">${discountPct}% OFF</span>` : ''}
+      </div>
       <div class="cake-card-body">
         <h3>${cake.name}</h3>
         <p class="desc">${cake.desc}</p>
+        <div class="rating-row">
+          ${starRatingMarkup(cake.rating)}
+          <span class="rating-value">${cake.rating.toFixed(1)}</span>
+          <span class="review-count">(${cake.reviews})</span>
+        </div>
+        <span class="delivery-tag">🚚 Earliest Delivery: ${cake.express ? 'Today' : 'Tomorrow'}</span>
         <div class="cake-card-footer">
-          <span class="price">$${cake.price.toFixed(2)}</span>
+          <div class="price-group">
+            ${discountPct > 0 ? `<span class="price-old">$${cake.originalPrice.toFixed(2)}</span>` : ''}
+            <span class="price">$${cake.price.toFixed(2)}</span>
+          </div>
           <button type="button" class="add-btn" data-id="${cake.id}">Add to Cart</button>
         </div>
       </div>
-    </article>
-  `).join('');
+    </article>`;
+  }).join('');
 
   grid.querySelectorAll('.add-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
@@ -153,6 +219,27 @@ function renderCatalog() {
     });
   });
 }
+
+document.querySelectorAll('.express-chip').forEach((chip) => {
+  chip.addEventListener('click', () => {
+    activeExpressFilter = chip.dataset.filter;
+    document.querySelectorAll('.express-chip').forEach((c) => c.classList.remove('active'));
+    chip.classList.add('active');
+    renderCatalog();
+  });
+});
+
+document.querySelectorAll('.price-filter').forEach((checkbox) => {
+  checkbox.addEventListener('change', () => {
+    activePriceBuckets = Array.from(document.querySelectorAll('.price-filter:checked')).map((cb) => cb.value);
+    renderCatalog();
+  });
+});
+
+document.getElementById('sort-select').addEventListener('change', (e) => {
+  activeSort = e.target.value;
+  renderCatalog();
+});
 
 // ---------- Cart mutations ----------
 

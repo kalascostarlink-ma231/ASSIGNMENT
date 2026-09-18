@@ -27,18 +27,15 @@
 </header>
 
 <!-- ===================== ADMIN ===================== -->
-<section class="section admin-page">
-  <div class="container">
+<section class="admin-page">
 
-    <!-- Logged out: login form -->
-    <div id="admin-login-view">
-      <div class="section-head">
-        <div>
-          <h2>Admin Access</h2>
-          <p>Log in with your Supabase admin account to view customer orders.</p>
-        </div>
-      </div>
-      <form class="lookup-form" id="login-form" style="max-width:420px;">
+  <!-- Logged out: login form -->
+  <div id="admin-login-view" class="admin-login-shell">
+    <div class="admin-login-card">
+      <div class="admin-login-badge">🔐</div>
+      <h2>Admin Access</h2>
+      <p>Log in with your Supabase admin account to view customer orders.</p>
+      <form id="login-form">
         <div class="field">
           <label for="login-email">Email</label>
           <input type="email" id="login-email" autocomplete="username" required>
@@ -51,9 +48,11 @@
         <button type="submit" class="btn btn-primary btn-block">Log In</button>
       </form>
     </div>
+  </div>
 
-    <!-- Logged in: orders dashboard -->
-    <div id="admin-orders-view" class="hidden">
+  <!-- Logged in: orders dashboard -->
+  <div id="admin-orders-view" class="hidden">
+    <div class="container">
 
       <div class="admin-header-row">
         <div>
@@ -61,23 +60,32 @@
           <p class="admin-note" id="admin-note"></p>
         </div>
         <div class="admin-toolbar-actions">
-          <button type="button" class="btn btn-outline" id="refresh-btn">Refresh</button>
-          <button type="button" class="btn btn-outline" id="logout-btn">Log Out</button>
+          <button type="button" class="admin-pill-btn" id="refresh-btn">↻ Refresh</button>
+          <button type="button" class="admin-pill-btn ghost" id="logout-btn">Log Out</button>
         </div>
       </div>
 
       <div class="admin-summary-cards">
-        <div class="summary-card">
-          <strong id="stat-total">0</strong>
-          <span>Total Orders</span>
+        <div class="summary-card accent-gold">
+          <span class="summary-icon">📦</span>
+          <div>
+            <strong id="stat-total">0</strong>
+            <span>Total Orders</span>
+          </div>
         </div>
-        <div class="summary-card">
-          <strong id="stat-new">0</strong>
-          <span>New / Unfulfilled</span>
+        <div class="summary-card accent-amber">
+          <span class="summary-icon">🕓</span>
+          <div>
+            <strong id="stat-new">0</strong>
+            <span>New / Unfulfilled</span>
+          </div>
         </div>
-        <div class="summary-card">
-          <strong id="stat-revenue">$0.00</strong>
-          <span>Revenue (non-cancelled)</span>
+        <div class="summary-card accent-green">
+          <span class="summary-icon">💰</span>
+          <div>
+            <strong id="stat-revenue">$0.00</strong>
+            <span>Revenue (non-cancelled)</span>
+          </div>
         </div>
       </div>
 
@@ -107,8 +115,8 @@
 
       <p class="admin-empty" id="orders-empty" style="display:none;">No orders yet.</p>
     </div>
-
   </div>
+
 </section>
 
 <script>
